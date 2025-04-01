@@ -37,16 +37,13 @@ const Events = () => {
   ];
 
   return (
-    <section id="events" className="section-padding bg-gray-50 relative">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-data-dots opacity-30"></div>
-      
+    <section id="events" className="section-padding bg-white relative">
       <div className="container mx-auto px-4 md:px-6 relative z-10">
         <div className="text-center mb-12">
-          <div className="inline-block px-4 py-1 rounded-full bg-secondary/10 text-secondary font-medium text-sm mb-4">
+          <div className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary font-medium text-sm mb-4">
             Events & Workshops
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Upcoming Events
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
@@ -56,38 +53,38 @@ const Events = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {upcomingEvents.map((event) => (
-            <Card key={event.id} className="group overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow">
+            <Card key={event.id} className="group overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow rounded-lg">
               <div className="relative h-40 overflow-hidden">
                 <img 
                   src={event.image} 
                   alt={event.title} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <Badge className="absolute top-3 left-3 bg-secondary hover:bg-secondary/90">
+                <Badge className="absolute top-3 left-3 bg-primary hover:bg-primary/90 rounded-full">
                   {event.category}
                 </Badge>
               </div>
               <CardContent className="p-6">
-                <h3 className="font-montserrat font-bold text-xl mb-2 text-primary group-hover:text-secondary transition-colors">
+                <h3 className="font-montserrat font-bold text-xl mb-2 text-gray-900 group-hover:text-primary transition-colors">
                   {event.title}
                 </h3>
                 
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-gray-600">
-                    <Calendar size={16} className="mr-2 text-secondary" />
+                    <Calendar size={16} className="mr-2 text-primary" />
                     <span>{event.date}</span>
                   </div>
                   <div className="flex items-center text-gray-600">
-                    <Clock size={16} className="mr-2 text-secondary" />
+                    <Clock size={16} className="mr-2 text-primary" />
                     <span>{event.time}</span>
                   </div>
                   <div className="flex items-center text-gray-600">
-                    <MapPin size={16} className="mr-2 text-secondary" />
+                    <MapPin size={16} className="mr-2 text-primary" />
                     <span>{event.location}</span>
                   </div>
                 </div>
                 
-                <Button variant="outline" className="w-full border-secondary text-secondary hover:bg-secondary hover:text-white group">
+                <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white group rounded-md">
                   Register
                   <ChevronRight size={16} className="ml-1 transition-transform group-hover:translate-x-1" />
                 </Button>
@@ -97,7 +94,7 @@ const Events = () => {
         </div>
 
         <div className="text-center mt-10">
-          <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white">
+          <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white rounded-md">
             View All Events
           </Button>
         </div>

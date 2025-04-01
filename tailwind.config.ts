@@ -26,16 +26,16 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#1A365D', // Deep data blue
+					DEFAULT: '#ea384c', // Modern red
 					foreground: 'hsl(var(--primary-foreground))'
 				},
 				secondary: {
-					DEFAULT: '#00A5B5', // Modern teal
+					DEFAULT: '#f04c60', // Lighter red accent
 					foreground: 'hsl(var(--secondary-foreground))'
 				},
 				accent: {
-					DEFAULT: '#7B1FA2', // Electric purple
-					light: '#9C27B0',
+					DEFAULT: '#e91e63', // Accent pink
+					light: '#f06292',
 					foreground: 'hsl(var(--accent-foreground))'
 				},
 				destructive: {
@@ -94,6 +94,14 @@ export default {
 				'data-flow': {
 					'0%': { transform: 'translateX(0)' },
 					'100%': { transform: 'translateX(-100%)' },
+				},
+				'data-pulse': {
+					'0%, 100%': { transform: 'scale(1)', opacity: '0.8' },
+					'50%': { transform: 'scale(1.05)', opacity: '1' },
+				},
+				'grid-flow': {
+					'0%': { backgroundPosition: '0% 0%' },
+					'100%': { backgroundPosition: '100% 100%' },
 				}
 			},
 			animation: {
@@ -102,11 +110,14 @@ export default {
 				'float': 'float 6s ease-in-out infinite',
 				'pulse-light': 'pulse-light 3s ease-in-out infinite',
 				'data-flow': 'data-flow 15s linear infinite',
+				'data-pulse': 'data-pulse 4s ease-in-out infinite',
+				'grid-flow': 'grid-flow 15s linear infinite',
 			},
 			backgroundImage: {
-				'hero-pattern': 'radial-gradient(circle at 50% 50%, rgba(26, 54, 93, 0.2) 10%, rgba(0, 165, 181, 0.1) 30%, transparent 70%)',
-				'data-gradient': 'linear-gradient(120deg, #1A365D, #00A5B5)',
-				'accent-gradient': 'linear-gradient(120deg, #7B1FA2, #9C27B0)',
+				'hero-pattern': 'radial-gradient(circle at 50% 50%, rgba(234, 56, 76, 0.15) 10%, rgba(240, 76, 96, 0.07) 30%, transparent 70%)',
+				'data-gradient': 'linear-gradient(120deg, #ea384c, #f04c60)',
+				'accent-gradient': 'linear-gradient(120deg, #e91e63, #f06292)',
+				'data-grid': 'linear-gradient(to right, rgba(234, 56, 76, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(234, 56, 76, 0.1) 1px, transparent 1px)',
 			}
 		}
 	},
