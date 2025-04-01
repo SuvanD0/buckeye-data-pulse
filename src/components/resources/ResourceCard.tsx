@@ -2,7 +2,7 @@
 import { Resource } from '@/models/Resource';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, BookOpen, Video, FileText, Tool, GraduationCap, Box } from 'lucide-react';
+import { ExternalLink, BookOpen, Video, FileText, Wrench, GraduationCap, Box } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ResourceCardProps {
@@ -19,7 +19,7 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ resource }) => {
       case 'ebook':
         return <BookOpen size={18} />;
       case 'tool':
-        return <Tool size={18} />;
+        return <Wrench size={18} />;
       case 'course':
         return <GraduationCap size={18} />;
       default:
