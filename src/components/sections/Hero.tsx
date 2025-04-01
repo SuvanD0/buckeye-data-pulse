@@ -1,23 +1,107 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
 const Hero = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  // Animation for the data visualization canvas
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Set canvas dimensions
+    const setCanvasDimensions = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    
+    setCanvasDimensions();
+    window.addEventListener('resize', setCanvasDimensions);
+    
+    // Create nodes
+    const nodeCount = 40;
+    const nodes: {x: number, y: number, radius: number, vx: number, vy: number, color: string}[] = [];
+    
+    for (let i = 0; i < nodeCount; i++) {
+      nodes.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 3 + 1,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        color: `rgba(234, 56, 76, ${Math.random() * 0.5 + 0.25})`
+      });
+    }
+    
+    // Animate nodes
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Update and draw nodes
+      nodes.forEach(node => {
+        node.x += node.vx;
+        node.y += node.vy;
+        
+        // Bounce off edges
+        if (node.x < 0 || node.x > canvas.width) node.vx *= -1;
+        if (node.y < 0 || node.y > canvas.height) node.vy *= -1;
+        
+        // Draw node
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+        ctx.fillStyle = node.color;
+        ctx.fill();
+      });
+      
+      // Draw connections
+      ctx.strokeStyle = 'rgba(234, 56, 76, 0.15)';
+      ctx.lineWidth = 0.5;
+      
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          if (distance < 100) {
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+      
+      requestAnimationFrame(animate);
+    };
+    
+    animate();
+    
+    return () => {
+      window.removeEventListener('resize', setCanvasDimensions);
+    };
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
-      {/* Minimal Data Visualization Background */}
+      {/* Dynamic Data Visualization Background */}
       <div className="absolute inset-0 bg-white z-0"></div>
-      <div className="absolute inset-0 bg-data-grid bg-[size:30px_30px] opacity-70 z-0 animate-grid-flow"></div>
+      <canvas ref={canvasRef} className="absolute inset-0 z-0"></canvas>
       
       {/* Accent Line */}
       <div className="absolute bottom-0 left-0 w-full h-1 bg-primary"></div>
       
-      {/* Dynamic Data Points */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-[20%] left-[10%] w-24 h-24 rounded-full bg-primary/10 animate-data-pulse"></div>
-        <div className="absolute top-[60%] left-[80%] w-32 h-32 rounded-full bg-secondary/10 animate-data-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-[75%] left-[25%] w-16 h-16 rounded-full bg-accent/10 animate-data-pulse" style={{ animationDelay: '2s' }}></div>
+      {/* Floating Data Elements */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[15%] left-[5%] w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/5 rounded-full animate-float"></div>
+        <div className="absolute top-[60%] right-[8%] w-24 h-24 bg-gradient-to-tr from-primary/30 to-primary/10 rounded-full animate-float" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-[30%] right-[25%] w-12 h-12 bg-gradient-to-bl from-primary/20 to-primary/5 rounded-full animate-float" style={{ animationDelay: '1.5s' }}></div>
+        <div className="absolute bottom-[20%] left-[20%] w-20 h-20 bg-gradient-to-tr from-primary/25 to-primary/5 rounded-full animate-float" style={{ animationDelay: '2s' }}></div>
       </div>
 
       <div className="container mx-auto px-4 md:px-6 relative z-10">
@@ -65,59 +149,41 @@ const Hero = () => {
           </div>
 
           <div className="hidden md:block relative">
-            {/* Data Visualization Element */}
-            <div className="aspect-square max-w-lg mx-auto relative">
-              <div className="absolute inset-0 rounded-full bg-white border-4 border-primary/20"></div>
-              
-              {/* Data Points */}
-              <div className="absolute inset-0">
-                {[...Array(12)].map((_, i) => {
-                  const angle = (i / 12) * Math.PI * 2;
-                  const x = 50 + 46 * Math.cos(angle);
-                  const y = 50 + 46 * Math.sin(angle);
-                  return (
-                    <div 
-                      key={i} 
-                      className="absolute w-2 h-2 bg-primary rounded-full transform -translate-x-1 -translate-y-1"
-                      style={{ 
-                        left: `${x}%`, 
-                        top: `${y}%`,
-                        opacity: 0.7 + (i % 3) * 0.1,
-                        animation: `data-pulse ${3 + i % 3}s infinite ease-in-out`,
-                        animationDelay: `${i * 0.2}s`
-                      }}
-                    />
-                  );
-                })}
-              </div>
-              
-              {/* Data Lines */}
-              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-                {[...Array(6)].map((_, i) => {
-                  const startAngle = (i / 6) * Math.PI * 2;
-                  const endAngle = ((i + 3) / 6) * Math.PI * 2;
-                  const startX = 50 + 40 * Math.cos(startAngle);
-                  const startY = 50 + 40 * Math.sin(startAngle);
-                  const endX = 50 + 40 * Math.cos(endAngle);
-                  const endY = 50 + 40 * Math.sin(endAngle);
-                  return (
-                    <line 
-                      key={i} 
-                      x1={startX} 
-                      y1={startY} 
-                      x2={endX} 
-                      y2={endY} 
-                      stroke="#ea384c" 
-                      strokeWidth="0.5" 
-                      opacity="0.3" 
-                    />
-                  );
-                })}
-              </svg>
-              
+            {/* 3D Data Visualization Element */}
+            <div className="relative w-full h-[500px]">
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-4xl font-bold font-montserrat text-primary">
-                  BDAA
+                <div className="w-full max-w-lg aspect-square relative">
+                  {/* Animated 3D Data Cube */}
+                  <div className="data-cube">
+                    <div className="cube-face cube-face-front"></div>
+                    <div className="cube-face cube-face-back"></div>
+                    <div className="cube-face cube-face-left"></div>
+                    <div className="cube-face cube-face-right"></div>
+                    <div className="cube-face cube-face-top"></div>
+                    <div className="cube-face cube-face-bottom"></div>
+                  </div>
+                  
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-5xl font-bold font-montserrat text-primary z-10">
+                      BDAA
+                    </div>
+                  </div>
+                  
+                  {/* Orbiting Elements */}
+                  <div className="orbit-container">
+                    {[...Array(5)].map((_, i) => (
+                      <div 
+                        key={i} 
+                        className="orbit-element"
+                        style={{ 
+                          animationDelay: `${i * 0.5}s`,
+                          animationDuration: `${15 + i * 2}s`
+                        }}
+                      >
+                        <div className="orbit-dot bg-primary"></div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

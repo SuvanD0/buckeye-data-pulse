@@ -102,6 +102,10 @@ export default {
 				'grid-flow': {
 					'0%': { backgroundPosition: '0% 0%' },
 					'100%': { backgroundPosition: '100% 100%' },
+				},
+				'orbit': {
+					'0%': { transform: 'rotate(0deg) translateX(150px) rotate(0deg)' },
+					'100%': { transform: 'rotate(360deg) translateX(150px) rotate(-360deg)' },
 				}
 			},
 			animation: {
@@ -112,6 +116,7 @@ export default {
 				'data-flow': 'data-flow 15s linear infinite',
 				'data-pulse': 'data-pulse 4s ease-in-out infinite',
 				'grid-flow': 'grid-flow 15s linear infinite',
+				'orbit': 'orbit 15s linear infinite',
 			},
 			backgroundImage: {
 				'hero-pattern': 'radial-gradient(circle at 50% 50%, rgba(234, 56, 76, 0.15) 10%, rgba(240, 76, 96, 0.07) 30%, transparent 70%)',
