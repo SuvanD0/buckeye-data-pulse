@@ -26,16 +26,16 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#ea384c', // Modern red
+					DEFAULT: '#b91c1c', // Darker red
 					foreground: 'hsl(var(--primary-foreground))'
 				},
 				secondary: {
-					DEFAULT: '#f04c60', // Lighter red accent
+					DEFAULT: '#dc2626', // Complementary red
 					foreground: 'hsl(var(--secondary-foreground))'
 				},
 				accent: {
-					DEFAULT: '#e91e63', // Accent pink
-					light: '#f06292',
+					DEFAULT: '#991b1b', // Darker accent red
+					light: '#ef4444',
 					foreground: 'hsl(var(--accent-foreground))'
 				},
 				destructive: {
@@ -119,10 +119,10 @@ export default {
 				'orbit': 'orbit 15s linear infinite',
 			},
 			backgroundImage: {
-				'hero-pattern': 'radial-gradient(circle at 50% 50%, rgba(234, 56, 76, 0.15) 10%, rgba(240, 76, 96, 0.07) 30%, transparent 70%)',
-				'data-gradient': 'linear-gradient(120deg, #ea384c, #f04c60)',
-				'accent-gradient': 'linear-gradient(120deg, #e91e63, #f06292)',
-				'data-grid': 'linear-gradient(to right, rgba(234, 56, 76, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(234, 56, 76, 0.1) 1px, transparent 1px)',
+				'hero-pattern': 'radial-gradient(circle at 50% 50%, rgba(185, 28, 28, 0.15) 10%, rgba(220, 38, 38, 0.07) 30%, transparent 70%)',
+				'data-gradient': 'linear-gradient(120deg, #b91c1c, #dc2626)',
+				'accent-gradient': 'linear-gradient(120deg, #991b1b, #ef4444)',
+				'data-grid': 'linear-gradient(to right, rgba(185, 28, 28, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(185, 28, 28, 0.1) 1px, transparent 1px)',
 			}
 		}
 	},

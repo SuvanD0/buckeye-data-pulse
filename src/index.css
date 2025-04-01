@@ -116,16 +116,16 @@
   }
   
   .nav-link {
-    @apply relative px-3 py-2 text-gray-700 hover:text-secondary transition-colors duration-200;
+    @apply relative px-3 py-2 text-gray-700 hover:text-primary transition-colors duration-200;
   }
   
   .nav-link.active {
-    @apply text-secondary font-medium;
+    @apply text-primary font-medium;
   }
   
   .nav-link.active::after {
     content: '';
-    @apply absolute bottom-0 left-0 w-full h-0.5 bg-secondary rounded-full;
+    @apply absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-full;
   }
   
   /* 3D Data Cube */
@@ -152,12 +152,12 @@
     position: absolute;
     width: 200px;
     height: 200px;
-    border: 1px solid rgba(234, 56, 76, 0.3);
-    background-color: rgba(234, 56, 76, 0.03);
+    border: 1px solid rgba(185, 28, 28, 0.3);
+    background-color: rgba(185, 28, 28, 0.03);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 15px rgba(234, 56, 76, 0.1) inset;
+    box-shadow: 0 0 15px rgba(185, 28, 28, 0.1) inset;
   }
   
   .cube-face-front {
@@ -202,7 +202,7 @@
     left: 50%;
     margin-top: -150px;
     margin-left: -150px;
-    border: 1px solid rgba(234, 56, 76, 0.15);
+    border: 1px solid rgba(185, 28, 28, 0.15);
     border-radius: 50%;
     animation: orbit-rotate 15s infinite linear;
   }
@@ -220,12 +220,12 @@
     position: absolute;
     width: 10px;
     height: 10px;
-    background-color: #ea384c;
+    background-color: #b91c1c;
     border-radius: 50%;
     top: 0;
     left: 50%;
     margin-left: -5px;
-    box-shadow: 0 0 10px rgba(234, 56, 76, 0.6);
+    box-shadow: 0 0 10px rgba(185, 28, 28, 0.6);
   }
   
   /* Float Animation */

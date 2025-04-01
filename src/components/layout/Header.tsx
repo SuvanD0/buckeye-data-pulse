@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 const Header = () => {
@@ -26,12 +27,12 @@ const Header = () => {
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <a href="/" className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center space-x-2">
               <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center">
                 <span className="text-white font-bold text-xl">B</span>
               </div>
               <span className="font-montserrat font-bold text-xl text-primary">BDAA</span>
-            </a>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
@@ -41,11 +42,12 @@ const Header = () => {
             <a href="#team" className="text-gray-700 hover:text-primary transition-colors">Team</a>
             <a href="#partners" className="text-gray-700 hover:text-primary transition-colors">Partners</a>
             <a href="#contact" className="text-gray-700 hover:text-primary transition-colors">Contact</a>
+            <Link to="/resources" className="text-gray-700 hover:text-primary transition-colors">Resources</Link>
           </nav>
 
           <div className="hidden md:flex items-center space-x-4">
             <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white rounded-md">
-              Resources
+              <Link to="/resources">Resources</Link>
             </Button>
             <Button className="bg-primary hover:bg-primary/90 text-white rounded-md">
               Join BDAA
@@ -74,10 +76,11 @@ const Header = () => {
           <a href="#team" className="text-lg font-medium p-3 hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Team</a>
           <a href="#partners" className="text-lg font-medium p-3 hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Partners</a>
           <a href="#contact" className="text-lg font-medium p-3 hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Contact</a>
+          <Link to="/resources" className="text-lg font-medium p-3 hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Resources</Link>
           
           <div className="mt-6 space-y-4">
             <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white rounded-md">
-              Resources
+              <Link to="/resources">Resources</Link>
             </Button>
             <Button className="w-full bg-primary hover:bg-primary/90 text-white rounded-md">
               Join BDAA
