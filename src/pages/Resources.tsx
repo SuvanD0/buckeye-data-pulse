@@ -14,6 +14,8 @@ import { Search, Filter, X, PlusCircle, Grid, ChevronLeft, Home } from 'lucide-r
 import { Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import BreadcrumbNavigation from '@/components/navigation/Breadcrumb';
+import QuickLinks from '@/components/navigation/QuickLinks';
 
 const Resources = () => {
   const [resources, setResources] = useState<Resource[]>(resourcesData);
@@ -23,6 +25,31 @@ const Resources = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const allTags = getAllTags();
+
+  // Quick links data
+  const quickLinks = [
+    {
+      label: "Data Analytics Workshop Materials",
+      href: "/resources?category=Workshop",
+      description: "Access slides and code from past workshops"
+    },
+    {
+      label: "Career Preparation Resources",
+      href: "/resources?category=Career",
+      description: "Resume templates, interview guides, and job boards"
+    },
+    {
+      label: "OSU Data Labs",
+      href: "https://tdai.osu.edu/data-labs/",
+      isExternal: true,
+      description: "University-wide data analytics labs and equipment"
+    },
+    {
+      label: "Submit a Resource",
+      href: "#",
+      description: "Share a helpful resource with the BDAA community"
+    },
+  ];
 
   // Filter resources based on search term and filters
   useEffect(() => {
@@ -92,16 +119,11 @@ const Resources = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+      
       <div className="pt-28 pb-16 bg-primary/5">
+        <BreadcrumbNavigation items={[{ label: 'Resources' }]} />
+        
         <div className="container px-4 mx-auto">
-          <div className="mb-6 flex items-center">
-            <Link to="/" className="flex items-center text-primary hover:text-primary/80 transition-colors">
-              <ChevronLeft className="mr-1 h-4 w-4" />
-              <Home className="mr-1 h-4 w-4" />
-              <span>Back to Home</span>
-            </Link>
-          </div>
-          
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Resources</h1>
             <p className="text-xl text-gray-600 mb-8">
@@ -223,105 +245,124 @@ const Resources = () => {
       <div className="container mx-auto px-4 py-12">
         <Tabs defaultValue="browse" className="w-full">
           <TabsContent value="browse" className="mt-0">
-            {/* Filters Panel */}
-            {showFilters && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 p-6 bg-white rounded-lg shadow-sm">
-                {/* Categories Filter */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-lg border-b pb-2">Categories</h3>
-                  <div className="space-y-2">
-                    {categories.map((category) => (
-                      <div key={category} className="flex items-center space-x-2">
-                        <Checkbox 
-                          id={`cat-${category}`} 
-                          checked={selectedCategories.includes(category)}
-                          onCheckedChange={() => toggleCategory(category)}
-                        />
-                        <Label htmlFor={`cat-${category}`} className="text-sm cursor-pointer">
-                          {category}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Resource Types Filter */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-lg border-b pb-2">Resource Types</h3>
-                  <div className="space-y-2">
-                    {resourceTypes.map((type) => (
-                      <div key={type} className="flex items-center space-x-2">
-                        <Checkbox 
-                          id={`type-${type}`} 
-                          checked={selectedTypes.includes(type)}
-                          onCheckedChange={() => toggleType(type)}
-                        />
-                        <Label htmlFor={`type-${type}`} className="text-sm capitalize cursor-pointer">
-                          {type}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Tags Filter */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-lg border-b pb-2">Popular Tags</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {allTags.map((tag) => (
-                      <Badge 
-                        key={tag}
-                        variant={selectedTags.includes(tag) ? "default" : "outline"}
-                        className={`cursor-pointer ${selectedTags.includes(tag) ? 'bg-primary' : ''}`}
-                        onClick={() => toggleTag(tag)}
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Resources Grid */}
-            {resources.length > 0 ? (
-              <>
-                {/* Featured Resources First */}
-                {resources.some(r => r.featured) && (
-                  <div className="mb-10">
-                    <h2 className="text-2xl font-bold mb-6">Featured Resources</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {resources
-                        .filter(r => r.featured)
-                        .map(resource => (
-                          <ResourceCard key={resource.id} resource={resource} />
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              <div className="lg:col-span-3">
+                {/* Filters Panel */}
+                {showFilters && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 p-6 bg-white rounded-lg shadow-sm">
+                    {/* Categories Filter */}
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-lg border-b pb-2">Categories</h3>
+                      <div className="space-y-2">
+                        {categories.map((category) => (
+                          <div key={category} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`cat-${category}`} 
+                              checked={selectedCategories.includes(category)}
+                              onCheckedChange={() => toggleCategory(category)}
+                            />
+                            <Label htmlFor={`cat-${category}`} className="text-sm cursor-pointer">
+                              {category}
+                            </Label>
+                          </div>
                         ))}
+                      </div>
+                    </div>
+                    
+                    {/* Resource Types Filter */}
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-lg border-b pb-2">Resource Types</h3>
+                      <div className="space-y-2">
+                        {resourceTypes.map((type) => (
+                          <div key={type} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`type-${type}`} 
+                              checked={selectedTypes.includes(type)}
+                              onCheckedChange={() => toggleType(type)}
+                            />
+                            <Label htmlFor={`type-${type}`} className="text-sm capitalize cursor-pointer">
+                              {type}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Tags Filter */}
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-lg border-b pb-2">Popular Tags</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {allTags.map((tag) => (
+                          <Badge 
+                            key={tag}
+                            variant={selectedTags.includes(tag) ? "default" : "outline"}
+                            className={`cursor-pointer ${selectedTags.includes(tag) ? 'bg-primary' : ''}`}
+                            onClick={() => toggleTag(tag)}
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
                 
-                {/* All Other Resources */}
-                <div>
-                  <h2 className="text-2xl font-bold mb-6">All Resources</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {resources
-                      .filter(r => !r.featured)
-                      .map(resource => (
-                        <ResourceCard key={resource.id} resource={resource} />
-                      ))}
+                {/* Resources Grid */}
+                {resources.length > 0 ? (
+                  <>
+                    {/* Featured Resources First */}
+                    {resources.some(r => r.featured) && (
+                      <div className="mb-10">
+                        <h2 className="text-2xl font-bold mb-6">Featured Resources</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {resources
+                            .filter(r => r.featured)
+                            .map(resource => (
+                              <ResourceCard key={resource.id} resource={resource} />
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* All Other Resources */}
+                    <div>
+                      <h2 className="text-2xl font-bold mb-6">All Resources</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {resources
+                          .filter(r => !r.featured)
+                          .map(resource => (
+                            <ResourceCard key={resource.id} resource={resource} />
+                          ))}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-16">
+                    <div className="text-4xl mb-4">🔍</div>
+                    <h3 className="text-xl font-semibold mb-2">No resources found</h3>
+                    <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
+                    <Button onClick={clearFilters} variant="outline">
+                      Clear All Filters
+                    </Button>
                   </div>
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-16">
-                <div className="text-4xl mb-4">🔍</div>
-                <h3 className="text-xl font-semibold mb-2">No resources found</h3>
-                <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
-                <Button onClick={clearFilters} variant="outline">
-                  Clear All Filters
-                </Button>
+                )}
               </div>
-            )}
+              
+              {/* Sidebar with Quick Links */}
+              <div className="lg:col-span-1 space-y-6">
+                <QuickLinks links={quickLinks} />
+                
+                <div className="bg-gradient-to-br from-primary/10 to-primary/20 rounded-lg p-6 shadow-sm">
+                  <h3 className="text-lg font-semibold mb-4">Join BDAA</h3>
+                  <p className="text-sm mb-4">
+                    Get access to exclusive resources, workshops, and networking opportunities by becoming a member.
+                  </p>
+                  <Button className="w-full">
+                    Become a Member
+                  </Button>
+                </div>
+              </div>
+            </div>
           </TabsContent>
           
           <TabsContent value="submit" className="mt-0">
