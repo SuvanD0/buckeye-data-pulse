@@ -10,7 +10,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Filter, X, PlusCircle, Grid } from 'lucide-react';
+import { Search, Filter, X, PlusCircle, Grid, ChevronLeft, Home } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 
 const Resources = () => {
   const [resources, setResources] = useState<Resource[]>(resourcesData);
@@ -88,8 +91,17 @@ const Resources = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Header />
       <div className="pt-28 pb-16 bg-primary/5">
         <div className="container px-4 mx-auto">
+          <div className="mb-6 flex items-center">
+            <Link to="/" className="flex items-center text-primary hover:text-primary/80 transition-colors">
+              <ChevronLeft className="mr-1 h-4 w-4" />
+              <Home className="mr-1 h-4 w-4" />
+              <span>Back to Home</span>
+            </Link>
+          </div>
+          
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Resources</h1>
             <p className="text-xl text-gray-600 mb-8">
@@ -118,7 +130,7 @@ const Resources = () => {
                       placeholder="Search resources..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-10 py-6 border-gray-200 rounded-lg shadow-sm focus:ring-primary focus:border-primary w-full text-base"
+                      className="pl-10 pr-10 border-gray-200 rounded-lg shadow-sm focus:ring-primary focus:border-primary w-full text-base"
                     />
                     {searchTerm && (
                       <button
@@ -317,6 +329,7 @@ const Resources = () => {
           </TabsContent>
         </Tabs>
       </div>
+      <Footer />
     </div>
   );
 };
