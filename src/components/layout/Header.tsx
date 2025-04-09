@@ -26,6 +26,7 @@ const Header = () => {
   }, [location.pathname]);
 
   const isHomePage = location.pathname === '/';
+  const isResourcesPage = location.pathname === '/resources';
 
   return (
     <header className={cn(
@@ -57,14 +58,22 @@ const Header = () => {
               <Link to="/" className="text-gray-700 hover:text-primary transition-colors">Home</Link>
             )}
             <Link to="/resources" className="text-gray-700 hover:text-primary transition-colors">Resources</Link>
+            <Link to="/admin" className="text-gray-700 hover:text-primary transition-colors">Admin</Link>
           </nav>
 
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white rounded-md">
-              <Link to="/resources">Resources</Link>
-            </Button>
+            {!isResourcesPage && (
+              <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white rounded-md">
+                <Link to="/resources">Resources</Link>
+              </Button>
+            )}
+            {isResourcesPage && (
+              <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white rounded-md">
+                <Link to="/">Back to Home</Link>
+              </Button>
+            )}
             <Button className="bg-primary hover:bg-primary/90 text-white rounded-md">
-              Join BDAA
+              <Link to="/login">Sign In</Link>
             </Button>
           </div>
 
@@ -97,13 +106,21 @@ const Header = () => {
             <Link to="/" className="text-lg font-medium p-3 hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Home</Link>
           )}
           <Link to="/resources" className="text-lg font-medium p-3 hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Resources</Link>
+          <Link to="/admin" className="text-lg font-medium p-3 hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Admin</Link>
           
           <div className="mt-6 space-y-4">
-            <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white rounded-md">
-              <Link to="/resources" onClick={() => setIsOpen(false)}>Resources</Link>
-            </Button>
+            {!isResourcesPage && (
+              <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white rounded-md">
+                <Link to="/resources" onClick={() => setIsOpen(false)}>Resources</Link>
+              </Button>
+            )}
+            {isResourcesPage && (
+              <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white rounded-md">
+                <Link to="/" onClick={() => setIsOpen(false)}>Back to Home</Link>
+              </Button>
+            )}
             <Button className="w-full bg-primary hover:bg-primary/90 text-white rounded-md">
-              Join BDAA
+              <Link to="/login" onClick={() => setIsOpen(false)}>Sign In</Link>
             </Button>
           </div>
         </nav>
