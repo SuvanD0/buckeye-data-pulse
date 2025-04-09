@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Menu, X, ChevronDown, Search, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -60,11 +59,12 @@ const Header = () => {
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Link to="/" className="flex items-center space-x-2">
-                <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">B</span>
-                </div>
-                <span className="font-montserrat font-bold text-xl text-primary">BDAA</span>
+              <Link to="/" className="flex items-center">
+                <img 
+                  src="/img/White Text Logo.1.png" 
+                  alt="BDAA Logo" 
+                  className="h-12 w-auto transition-all duration-300"
+                />
               </Link>
             </div>
 
@@ -164,7 +164,7 @@ const Header = () => {
                     <NavigationMenuContent>
                       <ul className="grid w-[400px] gap-3 p-4">
                         <li>
-                          <a href="#team" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                          <a href="/team" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
                             <div className="text-sm font-medium leading-none">Join the Team</div>
                             <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                               Apply for leadership positions and committees
@@ -238,7 +238,7 @@ const Header = () => {
               <>
                 <a href="#about" className="text-lg font-medium p-3 hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>About</a>
                 <a href="#events" className="text-lg font-medium p-3 hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Events</a>
-                <a href="#team" className="text-lg font-medium p-3 hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Team</a>
+                <a href="/team" className="text-lg font-medium p-3 hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Team</a>
                 <a href="#partners" className="text-lg font-medium p-3 hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Partners</a>
                 <a href="#contact" className="text-lg font-medium p-3 hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Contact</a>
               </>
@@ -269,7 +269,7 @@ const Header = () => {
             <div className="border-t pt-2">
               <p className="font-medium px-3 py-2">Get Involved</p>
               <div className="pl-4 space-y-2">
-                <a href="#team" className="block p-2 hover:bg-gray-50 rounded-md">Join the Team</a>
+                <a href="/team" className="block p-2 hover:bg-gray-50 rounded-md">Join the Team</a>
                 <a href="#partners" className="block p-2 hover:bg-gray-50 rounded-md">Partner With Us</a>
                 <a href="#contact" className="block p-2 hover:bg-gray-50 rounded-md">Contact</a>
               </div>

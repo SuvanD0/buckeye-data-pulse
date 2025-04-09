@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
@@ -149,43 +148,13 @@ const Hero = () => {
           </div>
 
           <div className="hidden md:block relative">
-            {/* 3D Data Visualization Element */}
-            <div className="relative w-full h-[500px]">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-full max-w-lg aspect-square relative">
-                  {/* Animated 3D Data Cube */}
-                  <div className="data-cube">
-                    <div className="cube-face cube-face-front"></div>
-                    <div className="cube-face cube-face-back"></div>
-                    <div className="cube-face cube-face-left"></div>
-                    <div className="cube-face cube-face-right"></div>
-                    <div className="cube-face cube-face-top"></div>
-                    <div className="cube-face cube-face-bottom"></div>
-                  </div>
-                  
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-5xl font-bold font-montserrat text-primary z-10">
-                      BDAA
-                    </div>
-                  </div>
-                  
-                  {/* Orbiting Elements */}
-                  <div className="orbit-container">
-                    {[...Array(5)].map((_, i) => (
-                      <div 
-                        key={i} 
-                        className="orbit-element"
-                        style={{ 
-                          animationDelay: `${i * 0.5}s`,
-                          animationDuration: `${15 + i * 2}s`
-                        }}
-                      >
-                        <div className="orbit-dot bg-primary"></div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+            {/* Graph Image */}
+            <div className="relative w-full h-[500px] flex items-center justify-center">
+              <img 
+                src="/img/bdaa-mascot-growth.png"
+                alt="BDAA Mascot Climbing Growth Chart"
+                className="w-full h-full object-contain"
+              />
             </div>
           </div>
         </div>

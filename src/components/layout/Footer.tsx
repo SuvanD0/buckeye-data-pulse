@@ -1,4 +1,3 @@
-
 import { Facebook, Twitter, Instagram, Linkedin, Mail } from 'lucide-react';
 
 const Footer = () => {
@@ -37,7 +36,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li><a href="#about" className="opacity-80 hover:opacity-100 hover:text-secondary transition-colors">About Us</a></li>
               <li><a href="#events" className="opacity-80 hover:opacity-100 hover:text-secondary transition-colors">Events</a></li>
-              <li><a href="#team" className="opacity-80 hover:opacity-100 hover:text-secondary transition-colors">Our Team</a></li>
+              <li><a href="/team" className="opacity-80 hover:opacity-100 hover:text-secondary transition-colors">Our Team</a></li>
               <li><a href="#partners" className="opacity-80 hover:opacity-100 hover:text-secondary transition-colors">Partners</a></li>
               <li><a href="#resources" className="opacity-80 hover:opacity-100 hover:text-secondary transition-colors">Resources</a></li>
             </ul>

@@ -1,0 +1,66 @@
+/* Flip Card Styles */
+.flip-card-container {
+    width: 100%;
+    height: 480px; /* Increased height for more content */
+    perspective: 1000px;
+    cursor: pointer;
+  }
+  
+  .flip-card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s, box-shadow 0.3s, translate 0.3s;
+    transform-style: preserve-3d;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+  }
+  
+  .flip-card-flipped {
+    transform: rotateY(180deg);
+  }
+  
+  .flip-card-front,
+  .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+  
+  .flip-card-front {
+    background-color: #fff;
+  }
+  
+  .flip-card-back {
+    transform: rotateY(180deg);
+    background-color: #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding: 20px;
+  }
+  
+  /* Subtle hover effect */
+  .flip-card:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .flip-card-flipped:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    transform: rotateY(180deg) translateY(-2px);
+  }
+  
+  /* Fix for Safari */
+  @media not all and (min-resolution:.001dpcm) { 
+    @supports (-webkit-appearance:none) {
+      .flip-card-back {
+        transform: rotateY(180deg) translateZ(1px);
+      }
+    }
+  }
