@@ -49,47 +49,13 @@ const Header = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // OSU navbar links
-  const osuLinks = [
-    { text: "OSU.edu", url: "https://www.osu.edu" },
-    { text: "Fisher College", url: "https://fisher.osu.edu" },
-    { text: "Student Life", url: "https://studentlife.osu.edu" },
-    { text: "BuckeyeLink", url: "https://buckeyelink.osu.edu" }
-  ];
-
   return (
     <>
-      {/* OSU Navbar */}
-      <div className="w-full bg-[#bb0000] text-white py-1 text-sm">
-        <div className="container mx-auto px-4 md:px-6 flex justify-between items-center">
-          <a href="https://www.osu.edu" className="font-semibold">The Ohio State University</a>
-          <div className="hidden sm:flex items-center space-x-4">
-            {osuLinks.map(link => (
-              <a href={link.url} key={link.text} className="hover:underline" target="_blank" rel="noopener noreferrer">
-                {link.text}
-              </a>
-            ))}
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center text-white sm:hidden">
-              OSU Links <ChevronDown className="ml-1 h-4 w-4" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {osuLinks.map(link => (
-                <DropdownMenuItem key={link.text} asChild>
-                  <a href={link.url} target="_blank" rel="noopener noreferrer">{link.text}</a>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
       {/* Main Header */}
       <header className={cn(
         "fixed w-full left-0 z-40 transition-all duration-300", 
         scrolled || !isHomePage || isOpen ? "bg-white backdrop-blur-sm shadow-sm py-3" : "bg-transparent py-5",
-        "top-[28px]" // Adjusted for OSU navbar
+        "top-0" // Adjusted now that OSU navbar is removed
       )}>
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between">
@@ -264,7 +230,7 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         <div className={cn(
-          "md:hidden fixed inset-x-0 top-[87px] bottom-0 bg-white z-40 pt-4 px-4 transform transition-transform duration-300 ease-in-out overflow-y-auto",
+          "md:hidden fixed inset-x-0 top-[56px] bottom-0 bg-white z-40 pt-4 px-4 transform transition-transform duration-300 ease-in-out overflow-y-auto",
           isOpen ? "translate-x-0" : "translate-x-full"
         )}>
           <nav className="flex flex-col space-y-4">
