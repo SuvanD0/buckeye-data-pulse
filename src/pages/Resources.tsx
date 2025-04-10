@@ -320,8 +320,9 @@ const Resources = () => {
                     <div className="space-y-4">
                       <h3 className="font-semibold text-lg border-b pb-2">Categories</h3>
                       <div className="space-y-2">
-                        {categories.map((category) => (
-                          <div key={category} className="flex items-center space-x-2">
+                        {/* Fix type issues with categories mapping */}
+                        {(categories as string[]).map((category) => (
+                          <div key={`cat-filter-${category}`} className="flex items-center space-x-2">
                             <Checkbox 
                               id={`cat-${category}`} 
                               checked={selectedCategories.includes(category)}
@@ -339,8 +340,9 @@ const Resources = () => {
                     <div className="space-y-4">
                       <h3 className="font-semibold text-lg border-b pb-2">Resource Types</h3>
                       <div className="space-y-2">
-                        {resourceTypes.map((type) => (
-                          <div key={type} className="flex items-center space-x-2">
+                        {/* Fix type issues with resourceTypes mapping */}
+                        {(resourceTypes as string[]).map((type) => (
+                          <div key={`type-filter-${type}`} className="flex items-center space-x-2">
                             <Checkbox 
                               id={`type-${type}`} 
                               checked={selectedTypes.includes(type)}
@@ -358,9 +360,10 @@ const Resources = () => {
                     <div className="space-y-4">
                       <h3 className="font-semibold text-lg border-b pb-2">Popular Tags</h3>
                       <div className="flex flex-wrap gap-2">
-                        {allTags.map((tag) => (
+                        {/* Fix type issues with allTags mapping */}
+                        {(allTags as string[]).map((tag) => (
                           <Badge 
-                            key={tag}
+                            key={`tag-filter-${tag}`}
                             variant={selectedTags.includes(tag) ? "default" : "outline"}
                             className={`cursor-pointer ${selectedTags.includes(tag) ? 'bg-primary' : ''}`}
                             onClick={() => toggleTag(tag)}
