@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Menu, X, ChevronDown, Search, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -191,11 +192,7 @@ const Header = () => {
                     </NavigationMenuContent>
                   </NavigationMenuItem>
                   
-                  <NavigationMenuItem>
-                    <Link to="/admin" className={navigationMenuTriggerStyle()}>
-                      Admin
-                    </Link>
-                  </NavigationMenuItem>
+                  {/* Removed Admin menu item */}
                 </NavigationMenuList>
               </NavigationMenu>
             </div>
@@ -275,7 +272,7 @@ const Header = () => {
               </div>
             </div>
             
-            <Link to="/admin" className="text-lg font-medium p-3 hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>Admin</Link>
+            {/* Removed Admin link from mobile menu */}
             
             <div className="mt-6 space-y-4">
               <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white rounded-md">

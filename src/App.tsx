@@ -12,6 +12,7 @@ import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Team from "./pages/Team";
+import AuthConfirmation from "./pages/AuthConfirmation";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/resources" element={<Resources />} />
             <Route path="/login" element={<Login />} />
             <Route path="/team" element={<Team />} />
+            <Route path="/auth-confirmation" element={<AuthConfirmation />} />
             <Route path="/admin" element={
               <ProtectedRoute>
                 <Admin />

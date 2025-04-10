@@ -93,7 +93,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         options: {
           data: {
             full_name: fullName,
-          }
+          },
+          emailRedirectTo: window.location.origin + '/auth-confirmation'
         }
       });
       if (error) throw error;
