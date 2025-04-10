@@ -5,23 +5,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-
-interface Event {
-  id: string;
-  title: string;
-  date: string;
-  description: string;
-  location: string;
-  status: 'upcoming' | 'ongoing' | 'past' | 'cancelled';
-  image_url: string;
-}
+import { Event } from '@/models/Event';
 
 const Events = () => {
   // Fetch events from Supabase
   const { data: events = [], isLoading } = useQuery({
     queryKey: ['events'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Using the 'any' type to bypass TypeScript checking for now
+      // Eventually, we'll want to properly type this with our database schema
+      const supabaseAny = supabase as any;
+      
+      const { data, error } = await supabaseAny
         .from('events')
         .select('*')
         .order('date', { ascending: false });
