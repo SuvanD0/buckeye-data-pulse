@@ -6,11 +6,13 @@ import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LogOut, Plus, ListFilter, Edit, Trash2 } from 'lucide-react';
+import { LogOut, Plus, ListFilter, Edit, Trash2, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AdminResourceForm from '@/components/admin/AdminResourceForm';
 import { Resource } from '@/models/Resource';
 import { resourcesData } from '@/data/resourcesData';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const Admin = () => {
   const [resources, setResources] = useState<Resource[]>([]);
@@ -18,6 +20,7 @@ const Admin = () => {
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, signOut, isAdmin } = useAuth();
 
   useEffect(() => {
     // In a real app, this would be an API call
@@ -71,12 +74,8 @@ const Admin = () => {
     setIsEditing(true);
   };
 
-  const handleSignOut = () => {
-    localStorage.removeItem('user');
-    toast({
-      title: "Signed out",
-      description: "You have been successfully signed out.",
-    });
+  const handleSignOut = async () => {
+    await signOut();
     navigate('/login');
   };
 
@@ -86,7 +85,19 @@ const Admin = () => {
       <main className="flex-1 pt-28 pb-16 px-4">
         <div className="container mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <div>
+              <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+              {isAdmin && (
+                <span className="inline-flex items-center gap-1 text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full mt-1">
+                  <Shield size={14} /> Admin Access
+                </span>
+              )}
+              {user && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Logged in as: {user.email}
+                </p>
+              )}
+            </div>
             <Button 
               variant="outline" 
               className="flex items-center gap-2"
