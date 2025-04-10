@@ -7,10 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { resourceTypes, categories } from '@/data/resourcesData';
 import { PlusCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchResourceTypes, fetchCategories } from '@/services/supabaseService';
 
-const ResourceSubmissionForm = () => {
+interface ResourceSubmissionFormProps {
+  onSubmit: (resource: any) => Promise<boolean>;
+}
+
+const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [url, setUrl] = useState('');
@@ -19,26 +24,72 @@ const ResourceSubmissionForm = () => {
   const [tags, setTags] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Fetch resource types
+  const { data: resourceTypes = [] } = useQuery({
+    queryKey: ['resourceTypes'],
+    queryFn: fetchResourceTypes
+  });
+
+  // Fetch categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!title || !description || !url || !type) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill out all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
-    // Simulate form submission
-    setTimeout(() => {
-      toast({
-        title: "Resource Submitted",
-        description: "Your resource has been submitted for review.",
-      });
+    try {
+      // Process tags
+      const tagList = tags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
       
-      // Reset form
-      setTitle('');
-      setDescription('');
-      setUrl('');
-      setCategory('');
-      setType('');
-      setTags('');
+      // If no specific category was selected but tags exist, use the first tag as category
+      const finalCategory = category || (tagList.length > 0 ? tagList[0] : 'Other');
+      
+      const resourceData = {
+        title,
+        description,
+        url,
+        type,
+        category: finalCategory,
+        tags: tagList
+      };
+      
+      const success = await onSubmit(resourceData);
+      
+      if (success) {
+        // Reset form
+        setTitle('');
+        setDescription('');
+        setUrl('');
+        setCategory('');
+        setType('');
+        setTags('');
+      }
+    } catch (error) {
+      console.error('Error in form submission:', error);
+      toast({
+        title: "Submission Failed",
+        description: "There was an error submitting your resource. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -74,14 +125,14 @@ const ResourceSubmissionForm = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Select value={category} onValueChange={setCategory} required>
+              <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
+                  {categories.map((cat: any) => (
+                    <SelectItem key={cat.id} value={cat.name}>
+                      {cat.name}
                     </SelectItem>
                   ))}
                   <SelectItem value="other">Other</SelectItem>
@@ -96,9 +147,9 @@ const ResourceSubmissionForm = () => {
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {resourceTypes.map((type) => (
-                    <SelectItem key={type} value={type} className="capitalize">
-                      {type}
+                  {resourceTypes.map((type: any) => (
+                    <SelectItem key={type.id} value={type.name} className="capitalize">
+                      {type.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

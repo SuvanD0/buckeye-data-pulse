@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import ResourceCard from '@/components/resources/ResourceCard';
 import ResourceSubmissionForm from '@/components/resources/ResourceSubmissionForm';
-import { resourcesData, categories, resourceTypes, getAllTags } from '@/data/resourcesData';
 import { Resource } from '@/models/Resource';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,44 +15,37 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import BreadcrumbNavigation from '@/components/navigation/Breadcrumb';
 import QuickLinks from '@/components/navigation/QuickLinks';
+import { useQuery } from '@tanstack/react-query';
+import { fetchAllResourcesAndCategories, submitResource } from '@/services/resourceService';
+import { useToast } from '@/hooks/use-toast';
 
 const Resources = () => {
-  const [resources, setResources] = useState<Resource[]>(resourcesData);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const allTags = getAllTags();
+  const { toast } = useToast();
 
-  // Quick links data
-  const quickLinks = [
-    {
-      label: "Data Analytics Workshop Materials",
-      href: "/resources?category=Workshop",
-      description: "Access slides and code from past workshops"
-    },
-    {
-      label: "Career Preparation Resources",
-      href: "/resources?category=Career",
-      description: "Resume templates, interview guides, and job boards"
-    },
-    {
-      label: "OSU Data Labs",
-      href: "https://tdai.osu.edu/data-labs/",
-      isExternal: true,
-      description: "University-wide data analytics labs and equipment"
-    },
-    {
-      label: "Submit a Resource",
-      href: "#",
-      description: "Share a helpful resource with the BDAA community"
-    },
-  ];
+  // Fetch resources using React Query
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['resourcesPage'],
+    queryFn: fetchAllResourcesAndCategories
+  });
+
+  const resources = data?.resources || [];
+  const categories = data?.categories || [];
+  const resourceTypes = data?.resourceTypes || [];
+  const allTags = data?.allTags || [];
+
+  // Filtered resources state
+  const [filteredResources, setFilteredResources] = useState<Resource[]>([]);
 
   // Filter resources based on search term and filters
   useEffect(() => {
-    let filtered = resourcesData;
+    if (!resources) return;
+
+    let filtered = [...resources];
     
     // Apply search
     if (searchTerm) {
@@ -82,8 +74,8 @@ const Resources = () => {
       );
     }
     
-    setResources(filtered);
-  }, [searchTerm, selectedCategories, selectedTypes, selectedTags]);
+    setFilteredResources(filtered);
+  }, [searchTerm, selectedCategories, selectedTypes, selectedTags, resources]);
 
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev => 
@@ -115,6 +107,80 @@ const Resources = () => {
     setSelectedTags([]);
     setSearchTerm('');
   };
+
+  const handleResourceSubmit = async (resourceData: Partial<Resource>) => {
+    try {
+      await submitResource(resourceData);
+      toast({
+        title: "Resource Submitted",
+        description: "Your resource has been submitted successfully.",
+      });
+      return true;
+    } catch (error) {
+      console.error('Error submitting resource:', error);
+      toast({
+        title: "Submission Failed",
+        description: "There was an error submitting your resource. Please try again.",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
+  // Quick links data
+  const quickLinks = [
+    {
+      label: "Data Analytics Workshop Materials",
+      href: "/resources?category=Workshop",
+      description: "Access slides and code from past workshops"
+    },
+    {
+      label: "Career Preparation Resources",
+      href: "/resources?category=Career",
+      description: "Resume templates, interview guides, and job boards"
+    },
+    {
+      label: "OSU Data Labs",
+      href: "https://tdai.osu.edu/data-labs/",
+      isExternal: true,
+      description: "University-wide data analytics labs and equipment"
+    },
+    {
+      label: "Submit a Resource",
+      href: "#",
+      description: "Share a helpful resource with the BDAA community"
+    },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="pt-28 pb-16">
+          <div className="container px-4 mx-auto text-center">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Resources</h1>
+            <p className="text-xl text-gray-600">Loading resources...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="pt-28 pb-16">
+          <div className="container px-4 mx-auto text-center">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Resources</h1>
+            <p className="text-xl text-red-600">Error loading resources. Please try again later.</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -308,14 +374,14 @@ const Resources = () => {
                 )}
                 
                 {/* Resources Grid */}
-                {resources.length > 0 ? (
+                {filteredResources.length > 0 ? (
                   <>
                     {/* Featured Resources First */}
-                    {resources.some(r => r.featured) && (
+                    {filteredResources.some(r => r.featured) && (
                       <div className="mb-10">
                         <h2 className="text-2xl font-bold mb-6">Featured Resources</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {resources
+                          {filteredResources
                             .filter(r => r.featured)
                             .map(resource => (
                               <ResourceCard key={resource.id} resource={resource} />
@@ -328,7 +394,7 @@ const Resources = () => {
                     <div>
                       <h2 className="text-2xl font-bold mb-6">All Resources</h2>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {resources
+                        {filteredResources
                           .filter(r => !r.featured)
                           .map(resource => (
                             <ResourceCard key={resource.id} resource={resource} />
@@ -366,7 +432,7 @@ const Resources = () => {
           </TabsContent>
           
           <TabsContent value="submit" className="mt-0">
-            <ResourceSubmissionForm />
+            <ResourceSubmissionForm onSubmit={handleResourceSubmit} />
           </TabsContent>
         </Tabs>
       </div>
