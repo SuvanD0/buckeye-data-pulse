@@ -60,8 +60,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await supabase.rpc('has_role', {
         _user_id: userId,
-        _role: 'admin'
-      } as { _user_id: string; _role: string });
+        _role: 'admin' as 'admin' | 'user'
+      });
       
       if (error) throw error;
       setIsAdmin(!!data);
