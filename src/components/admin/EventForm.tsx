@@ -9,15 +9,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { addEvent } from '@/services/supabaseEvents';
+import { addEvent } from '@/services/eventService';
 import { Event } from '@/models/Event';
 import { toast } from "sonner";
-import { supabase } from '@/integrations/supabase/client'; // Import supabase client for storage
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-// --- Zod Schema Update --- 
+// --- Zod Schema --- 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
 
@@ -31,7 +31,6 @@ const eventSchema = z.object({
     message: "Invalid end date/time format. Use YYYY-MM-DDTHH:MM"
   }),
   location: z.string().optional(),
-  // Changed from image_url string to image_file FileList
   image_file: z.instanceof(FileList)
     .optional()
     .refine((files) => !files || files.length === 0 || files?.[0]?.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
@@ -66,7 +65,7 @@ const EventForm: React.FC<EventFormProps> = ({ onSuccess }) => {
       start_time: '',
       end_time: '',
       location: '',
-      image_file: undefined, // Default value for file input
+      image_file: undefined,
     }
   });
 
@@ -107,11 +106,11 @@ const EventForm: React.FC<EventFormProps> = ({ onSuccess }) => {
       try {
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `public/${fileName}`; // Store in a 'public' folder within the bucket
+        const filePath = `public/${fileName}`;
 
         // Upload to Supabase Storage
         const { error: uploadError } = await supabase.storage
-          .from('event-images') // Use the bucket name
+          .from('event-images')
           .upload(filePath, imageFile);
 
         if (uploadError) {
@@ -131,8 +130,8 @@ const EventForm: React.FC<EventFormProps> = ({ onSuccess }) => {
       } catch (uploadError: any) {
         console.error("Image Upload Error:", uploadError);
         toast.error("Image Upload Failed", { description: uploadError.message });
-        setServerError(uploadError.message); // Show error near form
-        return; // Stop submission if upload fails
+        setServerError(uploadError.message);
+        return;
       }
     }
 
@@ -143,7 +142,7 @@ const EventForm: React.FC<EventFormProps> = ({ onSuccess }) => {
       start_time: new Date(data.start_time).toISOString(), 
       end_time: data.end_time ? new Date(data.end_time).toISOString() : undefined,
       location: data.location || '',
-      image_url: imageUrl, // Use the uploaded image URL (or undefined)
+      image_url: imageUrl,
     };
 
     // 3. Execute the mutation to add event data to the database

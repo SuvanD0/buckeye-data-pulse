@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import ResourceSubmissionForm from '@/components/resources/ResourceSubmissionForm';
@@ -7,14 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Search } from 'lucide-react';
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from 'sonner';
 import { submitResource } from '@/services/resourceService';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  fetchAllResourcesAndCategories
-} from '@/services/resourceService';
+import { fetchAllResourcesAndCategories } from '@/services/resourceService';
 
 interface Resource {
   id: string;
@@ -26,6 +23,7 @@ interface Resource {
   tags: string[];
   dateAdded: string;
   featured: boolean;
+  content?: string;
 }
 
 interface ResourceCategoriesProps {
@@ -72,7 +70,6 @@ const Resources = () => {
         } = await fetchAllResourcesAndCategories();
 
         setResources(initialResources);
-        // Add proper type assertions for these state updates
         setCategories(initialCategories as string[]);
         setTypes(initialTypes as string[]);
         setAllTags(initialAllTags as string[]);
@@ -140,6 +137,10 @@ const Resources = () => {
       // Call the submitResource function
       await submitResource(resourceData, user.id);
       
+      // Refresh resources after submission
+      const { resources: updatedResources } = await fetchAllResourcesAndCategories();
+      setResources(updatedResources);
+      
       toast.success("Resource submitted successfully!");
       return true;
     } catch (error: any) {
@@ -151,8 +152,8 @@ const Resources = () => {
     }
   };
 
+  // Resource Categories component
   const ResourceCategories = ({ categories, selectedCategory, onSelect }: ResourceCategoriesProps) => {
-    // Make sure categories is properly cast to a string array
     const categoryList = categories as string[];
     
     return (
@@ -183,9 +184,8 @@ const Resources = () => {
     );
   };
   
-  // Fix the resource types rendering:
+  // Resource Types component
   const ResourceTypes = ({ types, selectedType, onSelect }: ResourceTypesProps) => {
-    // Make sure types is properly cast to a string array
     const typesList = types as string[];
     
     return (
@@ -214,9 +214,8 @@ const Resources = () => {
     );
   };
   
-  // Fix the tags rendering:
+  // Tags component
   const TagCloud = ({ tags, selectedTags, onTagToggle }: TagCloudProps) => {
-    // Make sure tags is properly cast to a string array
     const tagList = tags as string[];
     
     return (

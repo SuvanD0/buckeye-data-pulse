@@ -9,5 +9,6 @@ export interface Resource {
   tags: string[];
   dateAdded: string;
   featured?: boolean;
-  content?: string; // Added field for blog-like content
+  content?: string;
+  user_id?: string;
 }

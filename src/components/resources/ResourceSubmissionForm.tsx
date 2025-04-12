@@ -20,7 +20,7 @@ interface ResourceSubmissionFormProps {
 const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [content, setContent] = useState(''); // Add content field for detailed information
+  const [content, setContent] = useState('');
   const [url, setUrl] = useState('');
   const [category, setCategory] = useState('');
   const [type, setType] = useState('');
@@ -76,7 +76,7 @@ const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
       const resourceData = {
         title,
         description,
-        content, // Add content field
+        content,
         url,
         type,
         category: finalCategory,
@@ -99,11 +99,9 @@ const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
         setType('');
         setTags('');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in form submission:', error);
-      toast.error("Submission Failed", {
-        description: "There was an error submitting your resource. Please try again."
-      });
+      toast.error(`Failed to submit resource: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }

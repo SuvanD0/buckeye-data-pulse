@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LogOut, Plus, ListFilter, Edit, Trash2, Shield, BookOpen, CalendarPlus } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { LogOut, Plus, Edit, Trash2, Shield, BookOpen, CalendarPlus } from 'lucide-react';
+import { toast } from 'sonner';
 import AdminResourceForm from '@/components/admin/AdminResourceForm';
 import EventForm from '@/components/admin/EventForm';
 import { Resource } from '@/models/Resource';
@@ -18,7 +19,6 @@ const Admin = () => {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
   const [isEditingResource, setIsEditingResource] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { user, signOut, isAdmin, isLoading: authIsLoading } = useAuth();
   const queryClient = useQueryClient();
 
@@ -40,19 +40,12 @@ const Admin = () => {
     mutationFn: createResource,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['resources'] });
-      toast({
-        title: "Resource added",
-        description: "The resource has been successfully added to Supabase.",
-      });
+      toast.success("Resource added successfully");
       setIsEditingResource(false);
       setSelectedResource(null);
     },
     onError: (error) => {
-      toast({
-        title: "Error adding resource",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(`Error adding resource: ${error.message}`);
     }
   });
 
@@ -61,19 +54,12 @@ const Admin = () => {
       updateResource(id, resource),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['resources'] });
-      toast({
-        title: "Resource updated",
-        description: "The resource has been successfully updated in Supabase.",
-      });
+      toast.success("Resource updated successfully");
       setIsEditingResource(false);
       setSelectedResource(null);
     },
     onError: (error) => {
-      toast({
-        title: "Error updating resource",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(`Error updating resource: ${error.message}`);
     }
   });
 
@@ -81,35 +67,47 @@ const Admin = () => {
     mutationFn: deleteResource,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['resources'] });
-      toast({
-        title: "Resource deleted",
-        description: "The resource has been successfully deleted from Supabase.",
-      });
+      toast.success("Resource deleted successfully");
     },
     onError: (error) => {
-      toast({
-        title: "Error deleting resource",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error(`Error deleting resource: ${error.message}`);
     }
   });
 
   const handleAddResource = (newResource: Resource) => {
-    addResourceMutation.mutate(newResource);
+    if (!user) {
+      toast.error("You must be logged in to add resources");
+      return;
+    }
+    
+    // Add user_id to the resource
+    const resourceWithUserId = {
+      ...newResource,
+      user_id: user.id
+    };
+    
+    addResourceMutation.mutate(resourceWithUserId);
   };
 
   const handleUpdateResource = (updatedResource: Resource) => {
     if (updatedResource.id) {
+      // Preserve the user_id when updating
+      const resourceWithUserId = {
+        ...updatedResource,
+        user_id: selectedResource?.user_id || user?.id
+      };
+      
       updateResourceMutation.mutate({ 
         id: updatedResource.id, 
-        resource: updatedResource 
+        resource: resourceWithUserId 
       });
     }
   };
 
   const handleDeleteResource = (id: string) => {
-    deleteResourceMutation.mutate(id);
+    if (confirm("Are you sure you want to delete this resource?")) {
+      deleteResourceMutation.mutate(id);
+    }
   };
 
   const handleEditResource = (resource: Resource) => {
@@ -124,13 +122,6 @@ const Admin = () => {
 
   const isAdminUser = userRole === 'admin' || isAdmin;
 
-  useEffect(() => {
-    if (!isAdminUser && !resourcesLoading) {
-      toast({ title: "Access Denied", description: "You do not have permission to view this page.", variant: "destructive" });
-      navigate('/');
-    }
-  }, [isAdminUser, resourcesLoading, navigate, toast]);
-
   if (authIsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -140,7 +131,15 @@ const Admin = () => {
   }
 
   if (!isAdminUser) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+          <p className="mb-4">You do not have permission to view this page.</p>
+          <Button onClick={() => navigate('/')}>Return to Home</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -259,12 +258,9 @@ const Admin = () => {
                <h2 className="text-xl font-semibold mb-4">Add New Event</h2>
                <EventForm 
                  onSuccess={() => {
-                    toast({ title: "Event Added", description: "The event has been added successfully." });
+                    toast.success("Event Added", { description: "The event has been added successfully." });
                  }}
                />
-              <div className="mt-8 p-4 border rounded-md bg-yellow-50 border-yellow-200 text-yellow-800">
-                <p className="text-sm">Event listing and editing functionalities for this tab are under development.</p>
-              </div>
             </TabsContent>
           </Tabs>
         </div>
