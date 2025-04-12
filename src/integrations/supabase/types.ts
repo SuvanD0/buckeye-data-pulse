@@ -259,6 +259,7 @@ export type Database = {
           difficulty_level:
             | Database["public"]["Enums"]["difficulty_level"]
             | null
+          featured: boolean | null
           file_path: string | null
           id: string
           resource_type_id: string | null
@@ -274,6 +275,7 @@ export type Database = {
           difficulty_level?:
             | Database["public"]["Enums"]["difficulty_level"]
             | null
+          featured?: boolean | null
           file_path?: string | null
           id?: string
           resource_type_id?: string | null
@@ -289,6 +291,7 @@ export type Database = {
           difficulty_level?:
             | Database["public"]["Enums"]["difficulty_level"]
             | null
+          featured?: boolean | null
           file_path?: string | null
           id?: string
           resource_type_id?: string | null

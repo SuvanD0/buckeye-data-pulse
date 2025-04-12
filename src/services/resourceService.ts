@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Resource } from '@/models/Resource';
 
@@ -50,9 +51,8 @@ export async function fetchAllResourcesAndCategories() {
       const categoryObjects = item.resource_categories || [];
       const tags = categoryObjects.map((cat) => cat.category_id?.name).filter(Boolean);
 
-      // Set a default value for featured since it doesn't exist in the database yet
-      // We're not trying to access item.featured directly anymore
-      const isFeatured = false; // Default to false for all resources
+      // Now the featured column exists in the database, so we can use it directly
+      const isFeatured = item.featured !== null ? Boolean(item.featured) : false;
 
       return {
         id: item.id,
@@ -63,7 +63,7 @@ export async function fetchAllResourcesAndCategories() {
         category: tags[0] || 'Other', // Use the first category as the main category
         tags: tags,
         dateAdded: new Date(item.created_at).toISOString().split('T')[0],
-        featured: isFeatured, // Set featured property explicitly
+        featured: isFeatured, // Use the featured value from the database
         content: item.content,
         user_id: item.user_id
       } as Resource;
@@ -136,8 +136,7 @@ export async function submitResource(resource: Partial<Resource>, userId: string
         difficulty_level: 'beginner', // Default
         user_id: userId,
         content: resource.content || null,
-        // Add featured as a custom field when inserting
-        featured: resource.featured || false
+        featured: resource.featured || false // Use the featured property from the resource or default to false
       })
       .select();
     
