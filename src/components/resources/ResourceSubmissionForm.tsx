@@ -7,9 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, AlertCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchResourceTypes, fetchCategories } from '@/services/supabaseService';
+import { useAuth } from '@/context/AuthContext';
+import { Link } from 'react-router-dom';
 
 interface ResourceSubmissionFormProps {
   onSubmit: (resource: any) => Promise<boolean>;
@@ -18,11 +20,13 @@ interface ResourceSubmissionFormProps {
 const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [content, setContent] = useState(''); // Add content field for detailed information
   const [url, setUrl] = useState('');
   const [category, setCategory] = useState('');
   const [type, setType] = useState('');
   const [tags, setTags] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
 
   // Fetch resource types
   const { data: resourceTypes = [], isLoading: isLoadingTypes } = useQuery({
@@ -38,6 +42,17 @@ const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!user) {
+      toast.error("Authentication Required", {
+        description: "Please sign in to submit resources.",
+        action: {
+          label: "Sign In",
+          onClick: () => window.location.href = "/login"
+        }
+      });
+      return;
+    }
     
     if (!title || !description || !url || !type) {
       toast.error("Missing Information", {
@@ -61,6 +76,7 @@ const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
       const resourceData = {
         title,
         description,
+        content, // Add content field
         url,
         type,
         category: finalCategory,
@@ -77,6 +93,7 @@ const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
         // Reset form
         setTitle('');
         setDescription('');
+        setContent('');
         setUrl('');
         setCategory('');
         setType('');
@@ -98,6 +115,18 @@ const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
         <CardTitle className="text-center text-2xl">Submit a Resource</CardTitle>
       </CardHeader>
       <CardContent>
+        {!user && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6 flex items-start">
+            <AlertCircle className="text-yellow-500 mr-2 h-5 w-5 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-yellow-800 font-medium">Authentication Required</p>
+              <p className="text-yellow-700 text-sm mt-1">
+                You need to <Link to="/login" className="underline font-medium">sign in</Link> to submit resources.
+              </p>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="title">Resource Title</Label>
@@ -111,7 +140,7 @@ const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Short Description</Label>
             <Textarea 
               id="description" 
               value={description}
@@ -120,6 +149,18 @@ const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
               required
               rows={3}
             />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="content">Detailed Content (Optional)</Label>
+            <Textarea 
+              id="content" 
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Add more detailed information about this resource (optional)"
+              rows={5}
+            />
+            <p className="text-sm text-gray-500">You can use this field to provide more comprehensive information about the resource</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -192,7 +233,7 @@ const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
             <Button 
               type="submit" 
               className="w-full bg-primary hover:bg-primary/90" 
-              disabled={isSubmitting}
+              disabled={isSubmitting || !user}
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               {isSubmitting ? "Submitting..." : "Submit Resource"}

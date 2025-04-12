@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Resource } from '@/models/Resource';
 
@@ -58,7 +59,8 @@ export async function fetchAllResourcesAndCategories() {
       category: tags[0] || 'Other', // Use the first category as the main category
       tags: tags,
       dateAdded: new Date(item.created_at).toISOString().split('T')[0],
-      featured: false // Default value
+      featured: false, // Default value
+      content: item.content // Add content from our updated schema
     } as Resource;
   });
 
@@ -84,8 +86,12 @@ export async function fetchAllResourcesAndCategories() {
 }
 
 export async function submitResource(resource: Partial<Resource>, userId: string) {
+  if (!userId) {
+    throw new Error('User ID is required to submit a resource');
+  }
+
   try {
-    console.log('Inside submitResource. User ID:', userId, 'Resource data:', resource);
+    console.log('Submitting resource with user ID:', userId, 'Resource data:', resource);
 
     // Using 'any' type to bypass TypeScript checking
     const supabaseAny = supabase as any;
@@ -101,14 +107,16 @@ export async function submitResource(resource: Partial<Resource>, userId: string
     if (existingType) {
       resourceTypeId = existingType.id;
     } else {
-      const { data: newType } = await supabaseAny
+      const { data: newType, error: newTypeError } = await supabaseAny
         .from('resource_types')
         .insert({ name: resource.type })
         .select('id');
+      
+      if (newTypeError) throw newTypeError;
       resourceTypeId = newType?.[0]?.id;
     }
 
-    // 2. Create the resource
+    // 2. Create the resource with user_id
     const { data: newResource, error: resourceError } = await supabaseAny
       .from('resources')
       .insert({
@@ -117,11 +125,15 @@ export async function submitResource(resource: Partial<Resource>, userId: string
         url: resource.url,
         resource_type_id: resourceTypeId,
         difficulty_level: 'beginner', // Default
-        user_id: userId // <-- Add user_id to the insert object
+        user_id: userId, // Add user_id to the insert object
+        content: resource.content || null // Add content from our updated schema
       })
       .select();
     
-    if (resourceError) throw resourceError;
+    if (resourceError) {
+      console.error('Error creating resource:', resourceError);
+      throw resourceError;
+    }
     
     const resourceId = newResource[0].id;
     
@@ -139,21 +151,28 @@ export async function submitResource(resource: Partial<Resource>, userId: string
         if (existingCategory) {
           categoryId = existingCategory.id;
         } else {
-          const { data: newCategory } = await supabaseAny
+          const { data: newCategory, error: newCategoryError } = await supabaseAny
             .from('categories')
             .insert({ name: tag })
             .select('id');
+          
+          if (newCategoryError) throw newCategoryError;
           categoryId = newCategory?.[0]?.id;
         }
         
         // Create the resource-category relationship
         if (categoryId) {
-          await supabaseAny
+          const { error: relationError } = await supabaseAny
             .from('resource_categories')
             .insert({
               resource_id: resourceId,
               category_id: categoryId
             });
+          
+          if (relationError) {
+            console.error('Error creating resource-category relationship:', relationError);
+            throw relationError;
+          }
         }
       }
     }

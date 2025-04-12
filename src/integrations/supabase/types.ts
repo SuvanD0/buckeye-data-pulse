@@ -253,6 +253,7 @@ export type Database = {
       }
       resources: {
         Row: {
+          content: string | null
           created_at: string
           description: string
           difficulty_level:
@@ -264,8 +265,10 @@ export type Database = {
           title: string
           updated_at: string
           url: string | null
+          user_id: string | null
         }
         Insert: {
+          content?: string | null
           created_at?: string
           description: string
           difficulty_level?:
@@ -277,8 +280,10 @@ export type Database = {
           title: string
           updated_at?: string
           url?: string | null
+          user_id?: string | null
         }
         Update: {
+          content?: string | null
           created_at?: string
           description?: string
           difficulty_level?:
@@ -290,6 +295,7 @@ export type Database = {
           title?: string
           updated_at?: string
           url?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {

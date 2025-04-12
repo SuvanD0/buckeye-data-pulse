@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,12 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { addEvent } from '@/services/supabaseEvents';
 import { Event } from '@/models/Event';
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client'; // Import supabase client for storage
+import { useAuth } from '@/context/AuthContext';
+import { AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 // --- Zod Schema Update --- 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -47,6 +51,7 @@ interface EventFormProps {
 const EventForm: React.FC<EventFormProps> = ({ onSuccess }) => {
   const [serverError, setServerError] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const { 
     register, 
@@ -86,6 +91,13 @@ const EventForm: React.FC<EventFormProps> = ({ onSuccess }) => {
   });
 
   const onSubmit: SubmitHandler<EventFormData> = async (data) => {
+    if (!user) {
+      toast.error("Authentication Required", {
+        description: "You must be logged in to add events.",
+      });
+      return;
+    }
+
     setServerError(null);
     let imageUrl: string | undefined = undefined;
     const imageFile = data.image_file?.[0];
@@ -127,10 +139,10 @@ const EventForm: React.FC<EventFormProps> = ({ onSuccess }) => {
     // 2. Prepare data for addEvent mutation
     const submissionData: Omit<Event, 'id' | 'created_at' | 'is_google_calendar_event' | 'google_calendar_id'> = {
       title: data.title,
-      description: data.description || undefined,
+      description: data.description || '',
       start_time: new Date(data.start_time).toISOString(), 
       end_time: data.end_time ? new Date(data.end_time).toISOString() : undefined,
-      location: data.location || undefined,
+      location: data.location || '',
       image_url: imageUrl, // Use the uploaded image URL (or undefined)
     };
 
@@ -145,6 +157,18 @@ const EventForm: React.FC<EventFormProps> = ({ onSuccess }) => {
         <CardDescription>Fill in the details for the new event.</CardDescription>
       </CardHeader>
       <CardContent>
+        {!user && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6 flex items-start">
+            <AlertCircle className="text-yellow-500 mr-2 h-5 w-5 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-yellow-800 font-medium">Authentication Required</p>
+              <p className="text-yellow-700 text-sm mt-1">
+                You need to <Link to="/login" className="underline font-medium">sign in</Link> to add events.
+              </p>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <Label htmlFor="title">Event Title</Label>
@@ -191,13 +215,19 @@ const EventForm: React.FC<EventFormProps> = ({ onSuccess }) => {
 
           {serverError && <p className="text-red-500 text-sm mt-1">Error: {serverError}</p>}
 
-          <Button type="submit" disabled={isSubmitting || mutation.isPending} className="w-full">
-            {isSubmitting || mutation.isPending ? 'Processing...' : 'Add Event'}
-          </Button>
+          <CardFooter className="px-0 pt-4">
+            <Button 
+              type="submit" 
+              disabled={isSubmitting || mutation.isPending || !user} 
+              className="w-full"
+            >
+              {isSubmitting || mutation.isPending ? 'Processing...' : 'Add Event'}
+            </Button>
+          </CardFooter>
         </form>
       </CardContent>
     </Card>
   );
 };
 
-export default EventForm; 
+export default EventForm;

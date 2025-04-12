@@ -12,6 +12,12 @@ type CreateEventData = Omit<Event, 'id' | 'created_at' | 'is_google_calendar_eve
  * @returns The newly created event data or throws an error.
  */
 export const addEvent = async (eventData: CreateEventData): Promise<Event> => {
+  // Verify user is authenticated before proceeding
+  const { data: session } = await supabase.auth.getSession();
+  if (!session?.session) {
+    throw new Error('Authentication required to add events');
+  }
+
   const { data, error } = await supabase
     .from('events')
     .insert([
@@ -38,7 +44,6 @@ export const addEvent = async (eventData: CreateEventData): Promise<Event> => {
   }
 
   // Cast the returned data to the Event type
-  // Supabase client might return a slightly different shape, adjust if needed
   return data as Event;
 };
 
@@ -50,7 +55,7 @@ export const fetchEvents = async (): Promise<Event[]> => {
   const { data, error } = await supabase
     .from('events')
     .select('*')
-    .order('start_time', { ascending: false }) // Order by start_time instead of date
+    .order('start_time', { ascending: false }) // Order by start_time
     .limit(20);
 
   if (error) {
@@ -61,6 +66,38 @@ export const fetchEvents = async (): Promise<Event[]> => {
   return data as Event[];
 };
 
-// Future functions can be added here:
-// export const updateEvent = async (eventId: string, eventData: Partial<CreateEventData>) => { ... };
-// export const deleteEvent = async (eventId: string) => { ... }; 
+// Add functions for updating and deleting events
+export const updateEvent = async (eventId: string, eventData: Partial<CreateEventData>): Promise<Event> => {
+  const { data, error } = await supabase
+    .from('events')
+    .update({
+      title: eventData.title,
+      description: eventData.description,
+      start_time: eventData.start_time,
+      end_time: eventData.end_time,
+      location: eventData.location,
+      image_url: eventData.image_url
+    })
+    .eq('id', eventId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating event:', error);
+    throw new Error(`Failed to update event: ${error.message}`);
+  }
+
+  return data as Event;
+};
+
+export const deleteEvent = async (eventId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('events')
+    .delete()
+    .eq('id', eventId);
+
+  if (error) {
+    console.error('Error deleting event:', error);
+    throw new Error(`Failed to delete event: ${error.message}`);
+  }
+};
