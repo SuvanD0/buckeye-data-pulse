@@ -51,6 +51,9 @@ export async function fetchAllResourcesAndCategories() {
       const categoryObjects = item.resource_categories || [];
       const tags = categoryObjects.map((cat) => cat.category_id?.name).filter(Boolean);
 
+      // Check if featured column exists in the database, if not set a default value
+      const isFeatured = typeof item.featured !== 'undefined' ? Boolean(item.featured) : false;
+
       return {
         id: item.id,
         title: item.title,
@@ -60,7 +63,7 @@ export async function fetchAllResourcesAndCategories() {
         category: tags[0] || 'Other', // Use the first category as the main category
         tags: tags,
         dateAdded: new Date(item.created_at).toISOString().split('T')[0],
-        featured: Boolean(item.featured) || false, // Ensure featured is always a boolean
+        featured: isFeatured, // Set featured property explicitly
         content: item.content,
         user_id: item.user_id
       } as Resource;
@@ -132,7 +135,8 @@ export async function submitResource(resource: Partial<Resource>, userId: string
         resource_type_id: resourceTypeId,
         difficulty_level: 'beginner', // Default
         user_id: userId,
-        content: resource.content || null
+        content: resource.content || null,
+        featured: resource.featured || false // Add featured property with default false
       })
       .select();
     

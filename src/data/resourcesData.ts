@@ -21,7 +21,8 @@ export const resourcesData: Resource[] = [
     type: "course",
     url: "https://example.com/advanced-sql",
     tags: ["sql", "advanced", "database"],
-    dateAdded: "2023-11-02"
+    dateAdded: "2023-11-02",
+    featured: false
   },
   {
     id: "3",
@@ -42,7 +43,8 @@ export const resourcesData: Resource[] = [
     type: "article",
     url: "https://example.com/data-viz-best-practices",
     tags: ["visualization", "charts", "design"],
-    dateAdded: "2023-12-05"
+    dateAdded: "2023-12-05",
+    featured: false
   },
   {
     id: "5",
@@ -63,7 +65,8 @@ export const resourcesData: Resource[] = [
     type: "video",
     url: "https://example.com/tableau-dashboard",
     tags: ["tableau", "dashboard", "visualization"],
-    dateAdded: "2023-10-28"
+    dateAdded: "2023-10-28",
+    featured: false
   },
   {
     id: "7",
@@ -73,7 +76,8 @@ export const resourcesData: Resource[] = [
     type: "article",
     url: "https://example.com/big-data-tools",
     tags: ["hadoop", "spark", "big data"],
-    dateAdded: "2023-12-10"
+    dateAdded: "2023-12-10",
+    featured: false
   },
   {
     id: "8",
@@ -83,7 +87,8 @@ export const resourcesData: Resource[] = [
     type: "ebook",
     url: "https://example.com/data-ethics",
     tags: ["ethics", "privacy", "compliance"],
-    dateAdded: "2023-09-05"
+    dateAdded: "2023-09-05",
+    featured: false
   },
   {
     id: "9",
@@ -93,7 +98,8 @@ export const resourcesData: Resource[] = [
     type: "course",
     url: "https://example.com/r-statistics",
     tags: ["R", "statistics", "programming"],
-    dateAdded: "2023-11-20"
+    dateAdded: "2023-11-20",
+    featured: false
   },
   {
     id: "10",
@@ -103,7 +109,8 @@ export const resourcesData: Resource[] = [
     type: "video",
     url: "https://example.com/nlp-fundamentals",
     tags: ["NLP", "text analytics", "machine learning"],
-    dateAdded: "2023-10-10"
+    dateAdded: "2023-10-10",
+    featured: false
   },
   {
     id: "11",
@@ -113,7 +120,8 @@ export const resourcesData: Resource[] = [
     type: "course",
     url: "https://example.com/excel-analysis",
     tags: ["excel", "spreadsheet", "analysis"],
-    dateAdded: "2023-12-01"
+    dateAdded: "2023-12-01",
+    featured: false
   },
   {
     id: "12",
@@ -123,7 +131,8 @@ export const resourcesData: Resource[] = [
     type: "article",
     url: "https://example.com/data-cleaning",
     tags: ["data cleaning", "preprocessing", "quality"],
-    dateAdded: "2023-09-15"
+    dateAdded: "2023-09-15",
+    featured: false
   }
 ];
 
