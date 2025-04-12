@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -71,9 +72,10 @@ const Resources = () => {
         } = await fetchAllResourcesAndCategories();
 
         setResources(initialResources);
-        setCategories(initialCategories);
-        setTypes(initialTypes);
-        setAllTags(initialAllTags);
+        // Add proper type assertions for these state updates
+        setCategories(initialCategories as string[]);
+        setTypes(initialTypes as string[]);
+        setAllTags(initialAllTags as string[]);
       } catch (err: any) {
         console.error('Error fetching resources:', err);
         setError(err.message || 'Failed to load resources.');
