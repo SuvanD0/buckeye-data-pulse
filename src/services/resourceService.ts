@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Resource } from '@/models/Resource';
 
@@ -126,7 +125,7 @@ export async function submitResource(resource: Partial<Resource>, userId: string
       resourceTypeId = newType?.[0]?.id;
     }
 
-    // 2. Create the resource with user_id
+    // 2. Create the resource with user_id and featured property
     const { data: newResource, error: resourceError } = await supabase
       .from('resources')
       .insert({
@@ -137,7 +136,8 @@ export async function submitResource(resource: Partial<Resource>, userId: string
         difficulty_level: 'beginner', // Default
         user_id: userId,
         content: resource.content || null,
-        featured: resource.featured || false // Add featured property with default false
+        // Add featured as a custom field when inserting
+        featured: resource.featured || false
       })
       .select();
     
