@@ -51,8 +51,9 @@ export async function fetchAllResourcesAndCategories() {
       const categoryObjects = item.resource_categories || [];
       const tags = categoryObjects.map((cat) => cat.category_id?.name).filter(Boolean);
 
-      // Check if featured column exists in the database, if not set a default value
-      const isFeatured = typeof item.featured !== 'undefined' ? Boolean(item.featured) : false;
+      // Set a default value for featured since it doesn't exist in the database yet
+      // We're not trying to access item.featured directly anymore
+      const isFeatured = false; // Default to false for all resources
 
       return {
         id: item.id,
