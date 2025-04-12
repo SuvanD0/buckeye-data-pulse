@@ -23,7 +23,7 @@ const Hero = () => {
     window.addEventListener('resize', setCanvasDimensions);
     
     // Create nodes
-    const nodeCount = 40;
+    const nodeCount = 30;
     const nodes: {x: number, y: number, radius: number, vx: number, vy: number, color: string}[] = [];
     
     for (let i = 0; i < nodeCount; i++) {

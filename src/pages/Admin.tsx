@@ -1,26 +1,25 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LogOut, Plus, ListFilter, Edit, Trash2, Shield } from 'lucide-react';
+import { LogOut, Plus, ListFilter, Edit, Trash2, Shield, BookOpen, CalendarPlus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AdminResourceForm from '@/components/admin/AdminResourceForm';
+import EventForm from '@/components/admin/EventForm';
 import { Resource } from '@/models/Resource';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { fetchResources, createResource, updateResource, deleteResource, getUserRole } from '@/services/supabaseService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const Admin = () => {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditingResource, setIsEditingResource] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, isLoading: authIsLoading } = useAuth();
   const queryClient = useQueryClient();
 
   // Fetch resources using React Query
@@ -45,7 +44,7 @@ const Admin = () => {
         title: "Resource added",
         description: "The resource has been successfully added to Supabase.",
       });
-      setIsEditing(false);
+      setIsEditingResource(false);
       setSelectedResource(null);
     },
     onError: (error) => {
@@ -66,7 +65,7 @@ const Admin = () => {
         title: "Resource updated",
         description: "The resource has been successfully updated in Supabase.",
       });
-      setIsEditing(false);
+      setIsEditingResource(false);
       setSelectedResource(null);
     },
     onError: (error) => {
@@ -115,7 +114,7 @@ const Admin = () => {
 
   const handleEditResource = (resource: Resource) => {
     setSelectedResource(resource);
-    setIsEditing(true);
+    setIsEditingResource(true);
   };
 
   const handleSignOut = async () => {
@@ -124,6 +123,25 @@ const Admin = () => {
   };
 
   const isAdminUser = userRole === 'admin' || isAdmin;
+
+  useEffect(() => {
+    if (!isAdminUser && !resourcesLoading) {
+      toast({ title: "Access Denied", description: "You do not have permission to view this page.", variant: "destructive" });
+      navigate('/');
+    }
+  }, [isAdminUser, resourcesLoading, navigate, toast]);
+
+  if (authIsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading Admin Access...
+      </div>
+    );
+  }
+
+  if (!isAdminUser) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -154,89 +172,99 @@ const Admin = () => {
             </Button>
           </div>
 
-          <Tabs defaultValue="resources" className="w-full">
+          <Tabs defaultValue="manage-resources" className="w-full">
             <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 lg:w-[400px]">
-              <TabsTrigger value="resources" className="flex items-center gap-2">
-                <ListFilter size={16} />
-                Resources
+              <TabsTrigger value="manage-resources" className="flex items-center gap-2">
+                <BookOpen size={16} />
+                Manage Resources
               </TabsTrigger>
-              <TabsTrigger value="add" className="flex items-center gap-2">
-                <Plus size={16} />
-                Add New
+              <TabsTrigger value="manage-events" className="flex items-center gap-2">
+                <CalendarPlus size={16} />
+                Manage Events
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="resources" className="mt-6">
+            <TabsContent value="manage-resources" className="mt-6">
+              {isEditingResource && (
+                 <div className="mb-6 p-6 bg-white rounded-lg shadow-sm">
+                   <h2 className="text-xl font-semibold mb-4">{isEditingResource ? 'Edit Resource' : 'Add New Resource'}</h2>
+                   <AdminResourceForm 
+                      onSubmit={isEditingResource ? handleUpdateResource : handleAddResource}
+                      initialData={selectedResource}
+                      isEditing={isEditingResource}
+                    />
+                    <Button variant="outline" size="sm" onClick={() => { setIsEditingResource(false); setSelectedResource(null); }} className="mt-4">
+                      Cancel Edit
+                    </Button>
+                 </div>
+              )}
+
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Existing Resources</h2>
+                {!isEditingResource && (
+                  <Button size="sm" onClick={() => { setSelectedResource(null); setIsEditingResource(true); }}>
+                    <Plus size={16} className="mr-1"/> Add Resource
+                  </Button>
+                )}
+              </div>
+              
               {resourcesLoading ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-500">Loading resources...</p>
-                </div>
-              ) : (
+                <div className="text-center py-12"><p className="text-gray-500">Loading resources...</p></div>
+              ) : resources.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {resources.map(resource => (
-                    <Card key={resource.id} className="h-full">
+                    <Card key={resource.id} className="h-full flex flex-col">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-lg">{resource.title}</CardTitle>
+                        <CardTitle className="text-lg line-clamp-2">{resource.title}</CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                      <CardContent className="flex-grow">
+                        <p className="text-sm text-gray-600 mb-4 line-clamp-3">
                           {resource.description}
                         </p>
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-1">
+                         <div className="flex items-center gap-1 mb-4">
                             <span className="text-xs px-2 py-1 bg-primary/10 rounded-full text-primary">
                               {resource.category}
                             </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="h-8 w-8 p-0" 
-                              onClick={() => handleEditResource(resource)}
-                            >
+                            <span className="text-xs px-2 py-1 bg-secondary/10 rounded-full text-secondary">
+                              {resource.type}
+                            </span>
+                         </div>
+                      </CardContent>
+                      <CardFooter className="border-t pt-4 mt-auto">
+                        <div className="flex justify-end items-center gap-2 w-full">
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => handleEditResource(resource)}>
                               <Edit size={16} />
                             </Button>
-                            <Button 
-                              variant="destructive" 
-                              size="sm" 
-                              className="h-8 w-8 p-0" 
-                              onClick={() => handleDeleteResource(resource.id)}
-                            >
+                            <Button variant="destructive" size="sm" className="h-8 w-8 p-0" onClick={() => handleDeleteResource(resource.id)}>
                               <Trash2 size={16} />
                             </Button>
-                          </div>
                         </div>
-                      </CardContent>
+                      </CardFooter>
                     </Card>
                   ))}
                 </div>
-              )}
-              
-              {!resourcesLoading && resources.length === 0 && (
+              ) : (
                 <div className="text-center py-12">
-                  <p className="text-gray-500 mb-4">No resources found</p>
-                  <Button 
-                    onClick={() => {
-                      setIsEditing(false);
-                      setSelectedResource(null);
-                      document.querySelector('[value="add"]')?.dispatchEvent(
-                        new MouseEvent('click', { bubbles: true })
-                      );
-                    }}
-                  >
-                    Add Your First Resource
-                  </Button>
+                  <p className="text-gray-500 mb-4">No resources found.</p>
+                  {!isEditingResource && (
+                     <Button size="sm" onClick={() => { setSelectedResource(null); setIsEditingResource(true); }}>
+                       <Plus size={16} className="mr-1"/> Add Your First Resource
+                    </Button>
+                  )}
                 </div>
               )}
             </TabsContent>
             
-            <TabsContent value="add" className="mt-6">
-              <AdminResourceForm 
-                onSubmit={isEditing ? handleUpdateResource : handleAddResource}
-                initialData={selectedResource}
-                isEditing={isEditing}
-              />
+            <TabsContent value="manage-events" className="mt-6">
+               <h2 className="text-xl font-semibold mb-4">Add New Event</h2>
+               <EventForm 
+                 onSuccess={() => {
+                    toast({ title: "Event Added", description: "The event has been added successfully." });
+                 }}
+               />
+              <div className="mt-8 p-4 border rounded-md bg-yellow-50 border-yellow-200 text-yellow-800">
+                <p className="text-sm">Event listing and editing functionalities for this tab are under development.</p>
+              </div>
             </TabsContent>
           </Tabs>
         </div>

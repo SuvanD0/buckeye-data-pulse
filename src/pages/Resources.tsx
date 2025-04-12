@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ResourceCard from '@/components/resources/ResourceCard';
 import ResourceSubmissionForm from '@/components/resources/ResourceSubmissionForm';
 import { Resource } from '@/models/Resource';
@@ -18,6 +17,8 @@ import QuickLinks from '@/components/navigation/QuickLinks';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAllResourcesAndCategories, submitResource } from '@/services/resourceService';
 import { useToast } from '@/hooks/use-toast';
+import { useResourceFilters } from '@/hooks/useResourceFilters';
+import { supabase } from '@/integrations/supabase/client';
 
 const Resources = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,44 +39,32 @@ const Resources = () => {
   const resourceTypes = data?.resourceTypes || [];
   const allTags = data?.allTags || [];
 
-  // Filtered resources state
-  const [filteredResources, setFilteredResources] = useState<Resource[]>([]);
+  // Quick links data
+  const quickLinks = [
+    {
+      label: "Data Analytics Workshop Materials",
+      href: "/resources?category=Workshop",
+      description: "Access slides and code from past workshops"
+    },
+    {
+      label: "Career Preparation Resources",
+      href: "/resources?category=Career",
+      description: "Resume templates, interview guides, and job boards"
+    },
+    {
+      label: "OSU Data Labs",
+      href: "https://tdai.osu.edu/data-labs/",
+      isExternal: true,
+      description: "University-wide data analytics labs and equipment"
+    },
+    {
+      label: "Submit a Resource",
+      href: "#",
+      description: "Share a helpful resource with the BDAA community"
+    },
+  ];
 
-  // Filter resources based on search term and filters
-  useEffect(() => {
-    if (!resources) return;
-
-    let filtered = [...resources];
-    
-    // Apply search
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(resource => 
-        resource.title.toLowerCase().includes(term) ||
-        resource.description.toLowerCase().includes(term) || 
-        resource.tags.some(tag => tag.toLowerCase().includes(term))
-      );
-    }
-    
-    // Apply category filter
-    if (selectedCategories.length > 0) {
-      filtered = filtered.filter(resource => selectedCategories.includes(resource.category));
-    }
-    
-    // Apply type filter
-    if (selectedTypes.length > 0) {
-      filtered = filtered.filter(resource => selectedTypes.includes(resource.type));
-    }
-    
-    // Apply tag filter
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter(resource => 
-        resource.tags.some(tag => selectedTags.includes(tag))
-      );
-    }
-    
-    setFilteredResources(filtered);
-  }, [searchTerm, selectedCategories, selectedTypes, selectedTags, resources]);
+  const { filteredResources } = useResourceFilters({ initialResources: resources });
 
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev => 
@@ -110,7 +99,27 @@ const Resources = () => {
 
   const handleResourceSubmit = async (resourceData: Partial<Resource>) => {
     try {
-      await submitResource(resourceData);
+      // Get the current user
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError || !user) {
+        console.error("Authentication error:", authError);
+        toast({
+          title: "Authentication Required",
+          description: "You must be logged in to submit a resource.",
+          variant: "destructive"
+        });
+        // TODO: Optionally redirect to login page
+        // navigate('/login');
+        return false; // Indicate submission failed
+      }
+
+      // ---> Add logging here
+      console.log('Submitting resource for user:', user.id);
+
+      // Pass user.id to submitResource
+      await submitResource(resourceData, user.id);
+
       toast({
         title: "Resource Submitted",
         description: "Your resource has been submitted successfully.",
@@ -126,31 +135,6 @@ const Resources = () => {
       return false;
     }
   };
-
-  // Quick links data
-  const quickLinks = [
-    {
-      label: "Data Analytics Workshop Materials",
-      href: "/resources?category=Workshop",
-      description: "Access slides and code from past workshops"
-    },
-    {
-      label: "Career Preparation Resources",
-      href: "/resources?category=Career",
-      description: "Resume templates, interview guides, and job boards"
-    },
-    {
-      label: "OSU Data Labs",
-      href: "https://tdai.osu.edu/data-labs/",
-      isExternal: true,
-      description: "University-wide data analytics labs and equipment"
-    },
-    {
-      label: "Submit a Resource",
-      href: "#",
-      description: "Share a helpful resource with the BDAA community"
-    },
-  ];
 
   if (isLoading) {
     return (

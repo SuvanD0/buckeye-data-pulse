@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Menu, X, ChevronDown, Search, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -133,12 +132,14 @@ const Header = () => {
                     <NavigationMenuContent>
                       <ul className="grid w-[400px] gap-3 p-4">
                         <li>
-                          <a href={isHomePage ? "#events" : "/#events"} className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                            <div className="text-sm font-medium leading-none">Upcoming Events</div>
-                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                              View our calendar of upcoming workshops and meetings
-                            </p>
-                          </a>
+                          <NavigationMenuLink asChild>
+                            <Link to="/events" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                              <div className="text-sm font-medium leading-none">Upcoming Events</div>
+                              <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                View our calendar of upcoming workshops and meetings
+                              </p>
+                            </Link>
+                          </NavigationMenuLink>
                         </li>
                         <li>
                           <a href="/events/past" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
@@ -257,7 +258,9 @@ const Header = () => {
             <div className="border-t pt-2">
               <p className="font-medium px-3 py-2">Events</p>
               <div className="pl-4 space-y-2">
-                <a href={isHomePage ? "#events" : "/#events"} className="block p-2 hover:bg-gray-50 rounded-md">Upcoming Events</a>
+                <Link to="/events" className="block p-2 hover:bg-gray-50 rounded-md" onClick={() => setIsOpen(false)}>
+                  Upcoming Events
+                </Link>
                 <a href="/events/past" className="block p-2 hover:bg-gray-50 rounded-md">Past Events</a>
                 <a href="/events/submit" className="block p-2 hover:bg-gray-50 rounded-md">Submit Event Idea</a>
               </div>

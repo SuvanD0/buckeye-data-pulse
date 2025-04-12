@@ -6,7 +6,7 @@ import Events from '../components/sections/Events';
 import Partners from '../components/sections/Partners';
 import Contact from '../components/sections/Contact';
 import CTA from '../components/sections/CTA';
-import DataVisualization from '../components/sections/DataVisualization';
+// import DataVisualization from '../components/sections/DataVisualization'; // Comment out import
 
 const Index = () => {
   return (
@@ -15,7 +15,7 @@ const Index = () => {
       <main>
         <Hero />
         <About />
-        <DataVisualization />
+        {/* <DataVisualization /> */ /* Comment out usage */}
         <Events />
         <Partners />
         <Contact />

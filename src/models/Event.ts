@@ -1,12 +1,12 @@
-
 export interface Event {
   id: string;
   title: string;
-  date: string;
+  start_time: string;
+  end_time?: string;
   description: string;
   location: string;
-  status: 'upcoming' | 'ongoing' | 'past' | 'cancelled';
   image_url?: string;
   created_at: string;
-  updated_at: string;
+  is_google_calendar_event?: boolean;
+  google_calendar_id?: string;
 }

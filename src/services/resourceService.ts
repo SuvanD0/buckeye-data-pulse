@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Resource } from '@/models/Resource';
 
@@ -84,8 +83,10 @@ export async function fetchAllResourcesAndCategories() {
   };
 }
 
-export async function submitResource(resource: Partial<Resource>) {
+export async function submitResource(resource: Partial<Resource>, userId: string) {
   try {
+    console.log('Inside submitResource. User ID:', userId, 'Resource data:', resource);
+
     // Using 'any' type to bypass TypeScript checking
     const supabaseAny = supabase as any;
     
@@ -115,7 +116,8 @@ export async function submitResource(resource: Partial<Resource>) {
         description: resource.description,
         url: resource.url,
         resource_type_id: resourceTypeId,
-        difficulty_level: 'beginner' // Default
+        difficulty_level: 'beginner', // Default
+        user_id: userId // <-- Add user_id to the insert object
       })
       .select();
     

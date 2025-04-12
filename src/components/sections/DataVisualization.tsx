@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { ChartContainer } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Badge } from '@/components/ui/badge';
+import { Trophy, Wrench } from 'lucide-react';
 
 const DataVisualization = () => {
   // Sample data for charts
@@ -15,20 +15,30 @@ const DataVisualization = () => {
     { year: '2023', members: 500 },
   ];
 
-  const workshopData = [
-    { month: 'Jan', count: 4 },
-    { month: 'Feb', count: 5 },
-    { month: 'Mar', count: 6 },
-    { month: 'Apr', count: 8 },
-    { month: 'May', count: 3 },
-    { month: 'Jun', count: 2 },
-    { month: 'Jul', count: 2 },
-    { month: 'Aug', count: 3 },
-    { month: 'Sep', count: 7 },
-    { month: 'Oct', count: 8 },
-    { month: 'Nov', count: 7 },
-    { month: 'Dec', count: 4 },
+  // NEW: Sample data for Competition Participation
+  const competitionData = [
+    { name: 'Kaggle Intro', participants: 25, year: 2022 },
+    { name: "OSU Datathon '23", participants: 40, year: 2023 },
+    { name: 'Internal Case Comp', participants: 32, year: 2023 },
+    { name: 'Predictive Analytics Challenge', participants: 28, year: 2024 },
+    { name: "OSU Datathon '24", participants: 55, year: 2024 },
   ];
+
+  // NEW: Sample data for Tool & Technology Focus
+  const toolFocusData = [
+    { tool: 'Python', focus: 85 },
+    { tool: 'SQL', focus: 70 },
+    { tool: 'R', focus: 45 },
+    { tool: 'Tableau', focus: 60 },
+    { tool: 'TensorFlow/Keras', focus: 55 },
+    { tool: 'Scikit-learn', focus: 75 },
+    { tool: 'Git/GitHub', focus: 50 },
+  ];
+
+  // Chart config helper
+  const chartConfig = (label: string, color: string) => ({
+    [label.toLowerCase()]: { label, color }
+  });
 
   return (
     <section className="section-padding bg-gray-50 relative">
@@ -41,10 +51,10 @@ const DataVisualization = () => {
             Our Impact
           </div>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Data-Driven Growth
+            Data-Driven Growth & Activity
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Visualizing our impact through data. See how BDAA has grown and expanded its reach across campus.
+            Visualizing our journey: member expansion, competitive engagement, and technology focus.
           </p>
         </div>
         
@@ -57,64 +67,75 @@ const DataVisualization = () => {
               </Badge>
             </div>
             <div className="h-[300px]">
-              <ChartContainer 
-                config={{ 
-                  members: { 
-                    label: "Members", 
-                    color: "#ea384c" 
-                  } 
-                }}
-              >
-                <BarChart data={memberGrowthData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <XAxis dataKey="year" tick={{ fill: '#666' }} />
-                  <YAxis tick={{ fill: '#666' }} />
-                  <Tooltip />
-                  <Bar dataKey="members" fill="#ea384c" radius={[4, 4, 0, 0]} />
-                </BarChart>
+              <ChartContainer config={chartConfig("Members", "#ea384c")}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={memberGrowthData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e0e0e0" />
+                    <XAxis dataKey="year" tick={{ fill: '#666', fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: '#666', fontSize: 12 }} axisLine={false} tickLine={false} width={30}/>
+                    <Tooltip
+                      cursor={{ fill: 'rgba(234, 56, 76, 0.1)' }}
+                      contentStyle={{ backgroundColor: 'white', borderRadius: '0.5rem', border: '1px solid #eee', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                    />
+                    <Bar dataKey="members" fill="#ea384c" radius={[4, 4, 0, 0]} barSize={30} />
+                  </BarChart>
+                </ResponsiveContainer>
               </ChartContainer>
             </div>
           </div>
           
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-900">Workshops Per Month</h3>
-              <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none">
-                57 Total
+              <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                 <Trophy size={20} className="mr-2 text-secondary"/> Competition Participation
+              </h3>
+              <Badge className="bg-secondary/10 text-secondary hover:bg-secondary/20 border-none">
+                Growing Engagement
               </Badge>
             </div>
             <div className="h-[300px]">
-              <ChartContainer 
-                config={{ 
-                  count: { 
-                    label: "Workshops", 
-                    color: "#f04c60" 
-                  } 
-                }}
-              >
-                <LineChart data={workshopData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <XAxis dataKey="month" tick={{ fill: '#666' }} />
-                  <YAxis tick={{ fill: '#666' }} />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="count" stroke="#f04c60" strokeWidth={3} dot={{ fill: '#f04c60', strokeWidth: 2, r: 4 }} />
-                </LineChart>
+              <ChartContainer config={chartConfig("Participants", "#f5a623")}>
+                <ResponsiveContainer width="100%" height="100%">
+                   {/* Using name for X-axis might get crowded, consider year or simplified names if needed */}
+                   <BarChart data={competitionData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e0e0e0" />
+                    <XAxis dataKey="name" tick={{ fill: '#666', fontSize: 10 }} interval={0} angle={-20} textAnchor="end" height={40} axisLine={false} tickLine={false}/>
+                    <YAxis tick={{ fill: '#666', fontSize: 12 }} axisLine={false} tickLine={false} width={30}/>
+                    <Tooltip
+                      cursor={{ fill: 'rgba(245, 166, 35, 0.1)' }}
+                      contentStyle={{ backgroundColor: 'white', borderRadius: '0.5rem', border: '1px solid #eee', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                    />
+                    <Bar dataKey="participants" fill="#f5a623" radius={[4, 4, 0, 0]} barSize={30} />
+                  </BarChart>
+                </ResponsiveContainer>
               </ChartContainer>
             </div>
           </div>
           
-          <div className="lg:col-span-2 p-6 bg-white rounded-lg shadow-md">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Skills Distribution</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {['Python', 'R', 'SQL', 'Tableau', 'Excel', 'Machine Learning', 'Data Mining', 'Visualization'].map((skill, index) => (
-                <div key={index} className="relative h-8 bg-gray-200 rounded-md overflow-hidden">
-                  <div 
-                    className="absolute top-0 left-0 h-full bg-primary"
-                    style={{ width: `${40 + Math.random() * 50}%` }}
-                  ></div>
-                  <div className="absolute inset-0 flex items-center px-3">
-                    <span className="text-sm font-medium text-white">{skill}</span>
-                  </div>
-                </div>
-              ))}
+          <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
+             <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                <Wrench size={20} className="mr-2 text-accent" /> Tool & Technology Focus
+              </h3>
+               <Badge className="bg-accent/10 text-accent hover:bg-accent/20 border-none">
+                Core Curriculum
+              </Badge>
+            </div>
+            <div className="h-[300px] mt-4">
+              <ChartContainer config={chartConfig("Focus", "#4a90e2")}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={toolFocusData} layout="horizontal" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e0e0e0" />
+                    <XAxis dataKey="tool" tick={{ fill: '#666', fontSize: 12 }} axisLine={false} tickLine={false}/>
+                    <YAxis tick={{ fill: '#666', fontSize: 12 }} axisLine={false} tickLine={false} width={30}/>
+                     <Tooltip
+                      cursor={{ fill: 'rgba(74, 144, 226, 0.1)' }}
+                      contentStyle={{ backgroundColor: 'white', borderRadius: '0.5rem', border: '1px solid #eee', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                    />
+                    <Bar dataKey="focus" fill="#4a90e2" radius={[4, 4, 0, 0]} barSize={30} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
             </div>
           </div>
         </div>

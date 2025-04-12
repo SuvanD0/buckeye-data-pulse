@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,19 +23,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
+    setIsLoading(true); // Ensure loading is true initially
+    setIsAdmin(false); // Reset admin status while checking
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      (_event, currentSession) => {
         setSession(currentSession);
-        setUser(currentSession?.user ?? null);
+        const currentUser = currentSession?.user ?? null;
+        setUser(currentUser);
+        setIsAdmin(false); // Reset admin status on any auth change before checking
         
-        // When session changes, check admin status
-        if (currentSession?.user) {
-          setTimeout(() => {
-            checkAdminStatus(currentSession.user.id);
-          }, 0);
+        if (currentUser) {
+          // No setTimeout needed
+          checkAdminStatus(currentUser.id).finally(() => {
+            // Optional: could set loading to false here if needed after check
+            // We primarily rely on the getSession check below for initial load state
+          });
         } else {
+          // No user, definitely not admin
           setIsAdmin(false);
+          // If there's no initial session either (checked below), loading should become false.
         }
       }
     );
@@ -44,17 +51,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
-      setUser(currentSession?.user ?? null);
+      const initialUser = currentSession?.user ?? null;
+      setUser(initialUser);
+      setIsAdmin(false); // Reset admin status initially
       
-      if (currentSession?.user) {
-        checkAdminStatus(currentSession.user.id);
+      if (initialUser) {
+        checkAdminStatus(initialUser.id).finally(() => {
+          setIsLoading(false); // Set loading false *after* initial check completes
+        });
+      } else {
+        setIsLoading(false); // No initial user, set loading false
       }
-      
-      setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, []); // Dependency array is empty, runs once on mount
 
   async function checkAdminStatus(userId: string) {
     try {
