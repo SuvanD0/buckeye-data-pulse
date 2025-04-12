@@ -69,7 +69,13 @@ const Resources = () => {
           allTags: initialAllTags,
         } = await fetchAllResourcesAndCategories();
 
-        setResources(initialResources);
+        // Ensure all resources have a featured property
+        const resourcesWithFeatured = initialResources.map(resource => ({
+          ...resource,
+          featured: resource.featured || false, // Set default to false if not present
+        }));
+
+        setResources(resourcesWithFeatured);
         setCategories(initialCategories as string[]);
         setTypes(initialTypes as string[]);
         setAllTags(initialAllTags as string[]);
@@ -139,7 +145,14 @@ const Resources = () => {
       
       // Refresh resources after submission
       const { resources: updatedResources } = await fetchAllResourcesAndCategories();
-      setResources(updatedResources);
+      
+      // Ensure all resources have a featured property
+      const resourcesWithFeatured = updatedResources.map(resource => ({
+        ...resource,
+        featured: resource.featured || false, // Set default to false if not present
+      }));
+      
+      setResources(resourcesWithFeatured);
       
       toast.success("Resource submitted successfully!");
       return true;

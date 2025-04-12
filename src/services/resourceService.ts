@@ -60,7 +60,7 @@ export async function fetchAllResourcesAndCategories() {
         category: tags[0] || 'Other', // Use the first category as the main category
         tags: tags,
         dateAdded: new Date(item.created_at).toISOString().split('T')[0],
-        featured: false, // Default value
+        featured: Boolean(item.featured) || false, // Ensure featured is always a boolean
         content: item.content,
         user_id: item.user_id
       } as Resource;

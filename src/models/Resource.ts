@@ -8,7 +8,7 @@ export interface Resource {
   url: string;
   tags: string[];
   dateAdded: string;
-  featured?: boolean;
+  featured: boolean; // Changed from optional to required
   content?: string;
   user_id?: string;
 }
