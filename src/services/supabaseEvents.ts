@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Event } from '@/models/Event';
 
@@ -39,6 +40,25 @@ export const addEvent = async (eventData: CreateEventData): Promise<Event> => {
   // Cast the returned data to the Event type
   // Supabase client might return a slightly different shape, adjust if needed
   return data as Event;
+};
+
+/**
+ * Fetches all events from the database.
+ * @returns An array of events sorted by start_time
+ */
+export const fetchEvents = async (): Promise<Event[]> => {
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .order('start_time', { ascending: false }) // Order by start_time instead of date
+    .limit(20);
+
+  if (error) {
+    console.error('Error fetching events:', error);
+    throw new Error(`Failed to fetch events: ${error.message}`);
+  }
+
+  return data as Event[];
 };
 
 // Future functions can be added here:

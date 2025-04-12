@@ -104,33 +104,42 @@ export type Database = {
       events: {
         Row: {
           created_at: string
-          date: string
           description: string
+          end_time: string | null
+          google_calendar_id: string | null
           id: string
           image_url: string | null
+          is_google_calendar_event: boolean | null
           location: string
+          start_time: string
           status: Database["public"]["Enums"]["event_status"] | null
           title: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          date: string
           description: string
+          end_time?: string | null
+          google_calendar_id?: string | null
           id?: string
           image_url?: string | null
+          is_google_calendar_event?: boolean | null
           location: string
+          start_time: string
           status?: Database["public"]["Enums"]["event_status"] | null
           title: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          date?: string
           description?: string
+          end_time?: string | null
+          google_calendar_id?: string | null
           id?: string
           image_url?: string | null
+          is_google_calendar_event?: boolean | null
           location?: string
+          start_time?: string
           status?: Database["public"]["Enums"]["event_status"] | null
           title?: string
           updated_at?: string

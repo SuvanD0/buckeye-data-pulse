@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { PlusCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchResourceTypes, fetchCategories } from '@/services/supabaseService';
@@ -25,13 +25,13 @@ const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch resource types
-  const { data: resourceTypes = [] } = useQuery({
+  const { data: resourceTypes = [], isLoading: isLoadingTypes } = useQuery({
     queryKey: ['resourceTypes'],
     queryFn: fetchResourceTypes
   });
 
   // Fetch categories
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: fetchCategories
   });
@@ -40,10 +40,8 @@ const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
     e.preventDefault();
     
     if (!title || !description || !url || !type) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill out all required fields.",
-        variant: "destructive"
+      toast.error("Missing Information", {
+        description: "Please fill out all required fields."
       });
       return;
     }
@@ -72,6 +70,10 @@ const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
       const success = await onSubmit(resourceData);
       
       if (success) {
+        toast.success("Resource Submitted", {
+          description: "Thank you for contributing to our resource library!"
+        });
+        
         // Reset form
         setTitle('');
         setDescription('');
@@ -82,10 +84,8 @@ const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
       }
     } catch (error) {
       console.error('Error in form submission:', error);
-      toast({
-        title: "Submission Failed",
-        description: "There was an error submitting your resource. Please try again.",
-        variant: "destructive"
+      toast.error("Submission Failed", {
+        description: "There was an error submitting your resource. Please try again."
       });
     } finally {
       setIsSubmitting(false);
@@ -130,11 +130,15 @@ const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((cat: any) => (
-                    <SelectItem key={cat.id} value={cat.name}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
+                  {isLoadingCategories ? (
+                    <SelectItem value="loading" disabled>Loading categories...</SelectItem>
+                  ) : (
+                    categories.map((cat: any) => (
+                      <SelectItem key={cat.id} value={cat.name}>
+                        {cat.name}
+                      </SelectItem>
+                    ))
+                  )}
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
@@ -147,11 +151,15 @@ const ResourceSubmissionForm = ({ onSubmit }: ResourceSubmissionFormProps) => {
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {resourceTypes.map((type: any) => (
-                    <SelectItem key={type.id} value={type.name} className="capitalize">
-                      {type.name}
-                    </SelectItem>
-                  ))}
+                  {isLoadingTypes ? (
+                    <SelectItem value="loading" disabled>Loading resource types...</SelectItem>
+                  ) : (
+                    resourceTypes.map((type: any) => (
+                      <SelectItem key={type.id} value={type.name} className="capitalize">
+                        {type.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>

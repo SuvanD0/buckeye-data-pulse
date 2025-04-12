@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Resource } from '@/models/Resource';
 import { v4 as uuidv4 } from 'uuid';
@@ -114,7 +113,7 @@ export async function fetchResourceTypes() {
     throw error;
   }
 
-  return data;
+  return data || [];
 }
 
 export async function fetchCategories() {
@@ -128,7 +127,7 @@ export async function fetchCategories() {
     throw error;
   }
 
-  return data;
+  return data || [];
 }
 
 export async function createResource(resource: Resource) {

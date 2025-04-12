@@ -1,428 +1,355 @@
-import { useState } from 'react';
-import ResourceCard from '@/components/resources/ResourceCard';
-import ResourceSubmissionForm from '@/components/resources/ResourceSubmissionForm';
-import { Resource } from '@/models/Resource';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Filter, X, PlusCircle, Grid, ChevronLeft, Home } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import BreadcrumbNavigation from '@/components/navigation/Breadcrumb';
-import QuickLinks from '@/components/navigation/QuickLinks';
-import { useQuery } from '@tanstack/react-query';
-import { fetchAllResourcesAndCategories, submitResource } from '@/services/resourceService';
-import { useToast } from '@/hooks/use-toast';
-import { useResourceFilters } from '@/hooks/useResourceFilters';
-import { supabase } from '@/integrations/supabase/client';
+import ResourceSubmissionForm from '@/components/resources/ResourceSubmissionForm';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Search } from 'lucide-react';
+import { toast } from 'sonner';
+import { submitResource } from '@/services/resourceService';
+import { useAuth } from '@/context/AuthContext';
+import { 
+  fetchAllResourcesAndCategories
+} from '@/services/resourceService';
+
+interface Resource {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  type: string;
+  category: string;
+  tags: string[];
+  dateAdded: string;
+  featured: boolean;
+}
+
+interface ResourceCategoriesProps {
+  categories: string[] | null;
+  selectedCategory: string;
+  onSelect: (category: string) => void;
+}
+
+interface ResourceTypesProps {
+  types: string[] | null;
+  selectedType: string;
+  onSelect: (type: string) => void;
+}
+
+interface TagCloudProps {
+  tags: string[] | null;
+  selectedTags: string[];
+  onTagToggle: (tag: string) => void;
+}
 
 const Resources = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [types, setTypes] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedType, setSelectedType] = useState('all');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
-  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSubmittingResource, setIsSubmittingResource] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
-  // Fetch resources using React Query
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['resourcesPage'],
-    queryFn: fetchAllResourcesAndCategories
+  useEffect(() => {
+    const loadResources = async () => {
+      try {
+        setLoading(true);
+        const {
+          resources: initialResources,
+          categories: initialCategories,
+          resourceTypes: initialTypes,
+          allTags: initialAllTags,
+        } = await fetchAllResourcesAndCategories();
+
+        setResources(initialResources);
+        setCategories(initialCategories);
+        setTypes(initialTypes);
+        setAllTags(initialAllTags);
+      } catch (err: any) {
+        console.error('Error fetching resources:', err);
+        setError(err.message || 'Failed to load resources.');
+        toast.error(`Failed to load resources: ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadResources();
+  }, []);
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+  };
+
+  const handleTypeSelect = (type: string) => {
+    setSelectedType(type);
+  };
+
+  const handleTagToggle = (tag: string) => {
+    setSelectedTags((prevTags) =>
+      prevTags.includes(tag)
+        ? prevTags.filter((t) => t !== tag)
+        : [...prevTags, tag]
+    );
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const filteredResources = resources.filter((resource) => {
+    const categoryMatch =
+      selectedCategory === 'all' || resource.category === selectedCategory;
+    const typeMatch = selectedType === 'all' || resource.type === selectedType;
+    const tagMatch =
+      selectedTags.length === 0 || resource.tags.some((tag) => selectedTags.includes(tag));
+    const searchMatch =
+      searchQuery === '' ||
+      resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      resource.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return categoryMatch && typeMatch && tagMatch && searchMatch;
   });
 
-  const resources = data?.resources || [];
-  const categories = data?.categories || [];
-  const resourceTypes = data?.resourceTypes || [];
-  const allTags = data?.allTags || [];
-
-  // Quick links data
-  const quickLinks = [
-    {
-      label: "Data Analytics Workshop Materials",
-      href: "/resources?category=Workshop",
-      description: "Access slides and code from past workshops"
-    },
-    {
-      label: "Career Preparation Resources",
-      href: "/resources?category=Career",
-      description: "Resume templates, interview guides, and job boards"
-    },
-    {
-      label: "OSU Data Labs",
-      href: "https://tdai.osu.edu/data-labs/",
-      isExternal: true,
-      description: "University-wide data analytics labs and equipment"
-    },
-    {
-      label: "Submit a Resource",
-      href: "#",
-      description: "Share a helpful resource with the BDAA community"
-    },
-  ];
-
-  const { filteredResources } = useResourceFilters({ initialResources: resources });
-
-  const toggleCategory = (category: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(category)
-        ? prev.filter(item => item !== category)
-        : [...prev, category]
-    );
-  };
-
-  const toggleType = (type: string) => {
-    setSelectedTypes(prev => 
-      prev.includes(type)
-        ? prev.filter(item => item !== type)
-        : [...prev, type]
-    );
-  };
-
-  const toggleTag = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag)
-        ? prev.filter(item => item !== tag)
-        : [...prev, tag]
-    );
-  };
-
-  const clearFilters = () => {
-    setSelectedCategories([]);
-    setSelectedTypes([]);
-    setSelectedTags([]);
-    setSearchTerm('');
-  };
-
-  const handleResourceSubmit = async (resourceData: Partial<Resource>) => {
+  const handleSubmit = async (resourceData: any) => {
+    setIsSubmittingResource(true);
     try {
-      // Get the current user
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-      if (authError || !user) {
-        console.error("Authentication error:", authError);
-        toast({
-          title: "Authentication Required",
-          description: "You must be logged in to submit a resource.",
-          variant: "destructive"
-        });
-        // TODO: Optionally redirect to login page
-        // navigate('/login');
-        return false; // Indicate submission failed
+      if (!user) {
+        toast.error("You must be logged in to submit a resource.");
+        return false;
       }
-
-      // ---> Add logging here
-      console.log('Submitting resource for user:', user.id);
-
-      // Pass user.id to submitResource
+      
+      // Ensure user and user.id are valid before proceeding
+      if (!user || !user.id) {
+        console.error("User ID is missing or invalid.");
+        toast.error("User authentication failed. Please log in again.");
+        return false;
+      }
+      
+      // Call the submitResource function
       await submitResource(resourceData, user.id);
-
-      toast({
-        title: "Resource Submitted",
-        description: "Your resource has been submitted successfully.",
-      });
+      
+      toast.success("Resource submitted successfully!");
       return true;
-    } catch (error) {
-      console.error('Error submitting resource:', error);
-      toast({
-        title: "Submission Failed",
-        description: "There was an error submitting your resource. Please try again.",
-        variant: "destructive"
-      });
+    } catch (error: any) {
+      console.error("Error submitting resource:", error);
+      toast.error(`Failed to submit resource: ${error.message}`);
       return false;
+    } finally {
+      setIsSubmittingResource(false);
     }
   };
 
-  if (isLoading) {
+  const ResourceCategories = ({ categories, selectedCategory, onSelect }: ResourceCategoriesProps) => {
+    // Make sure categories is properly cast to a string array
+    const categoryList = categories as string[];
+    
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="pt-28 pb-16">
-          <div className="container px-4 mx-auto text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Resources</h1>
-            <p className="text-xl text-gray-600">Loading resources...</p>
+      <div className="mb-6">
+        <h3 className="text-sm font-medium mb-2 text-gray-500">Categories</h3>
+        <ScrollArea className="max-h-[calc(100vh-300px)]">
+          <div className="space-y-1">
+            <Button
+              variant={selectedCategory === 'all' ? 'default' : 'ghost'}
+              className={`w-full justify-start text-sm ${selectedCategory === 'all' ? '' : 'text-gray-700'}`}
+              onClick={() => onSelect('all')}
+            >
+              All Categories
+            </Button>
+            {categoryList.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? 'default' : 'ghost'}
+                className={`w-full justify-start text-sm ${selectedCategory === category ? '' : 'text-gray-700'}`}
+                onClick={() => onSelect(category)}
+              >
+                {category}
+              </Button>
+            ))}
           </div>
-        </div>
-        <Footer />
+        </ScrollArea>
       </div>
     );
-  }
-
-  if (error) {
+  };
+  
+  // Fix the resource types rendering:
+  const ResourceTypes = ({ types, selectedType, onSelect }: ResourceTypesProps) => {
+    // Make sure types is properly cast to a string array
+    const typesList = types as string[];
+    
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="pt-28 pb-16">
-          <div className="container px-4 mx-auto text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Resources</h1>
-            <p className="text-xl text-red-600">Error loading resources. Please try again later.</p>
-          </div>
+      <div className="mb-6">
+        <h3 className="text-sm font-medium mb-2 text-gray-500">Resource Types</h3>
+        <div className="space-y-1">
+          <Button
+            variant={selectedType === 'all' ? 'default' : 'ghost'}
+            className={`w-full justify-start text-sm ${selectedType === 'all' ? '' : 'text-gray-700'}`}
+            onClick={() => onSelect('all')}
+          >
+            All Types
+          </Button>
+          {typesList.map((type) => (
+            <Button
+              key={type}
+              variant={selectedType === type ? 'default' : 'ghost'}
+              className={`w-full justify-start text-sm ${selectedType === type ? '' : 'text-gray-700'}`}
+              onClick={() => onSelect(type)}
+            >
+              {type}
+            </Button>
+          ))}
         </div>
-        <Footer />
       </div>
     );
-  }
+  };
+  
+  // Fix the tags rendering:
+  const TagCloud = ({ tags, selectedTags, onTagToggle }: TagCloudProps) => {
+    // Make sure tags is properly cast to a string array
+    const tagList = tags as string[];
+    
+    return (
+      <div className="mb-6">
+        <h3 className="text-sm font-medium mb-2 text-gray-500">Popular Tags</h3>
+        <div className="flex flex-wrap gap-2">
+          {tagList.map((tag) => (
+            <Badge
+              key={tag}
+              variant={selectedTags.includes(tag) ? 'default' : 'outline'}
+              className={`cursor-pointer ${
+                selectedTags.includes(tag)
+                  ? 'bg-primary hover:bg-primary/80'
+                  : 'hover:bg-primary/10'
+              }`}
+              onClick={() => onTagToggle(tag)}
+            >
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      
-      <div className="pt-28 pb-16 bg-primary/5">
-        <BreadcrumbNavigation items={[{ label: 'Resources' }]} />
-        
-        <div className="container px-4 mx-auto">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Resources</h1>
-            <p className="text-xl text-gray-600 mb-8">
-              Explore our collection of data analytics resources, guides, and tools to enhance your skills and knowledge.
-            </p>
-            
-            <Tabs defaultValue="browse" className="w-full max-w-xl mx-auto">
-              <TabsList className="grid w-full grid-cols-2 mb-8">
-                <TabsTrigger value="browse" className="flex items-center gap-2">
-                  <Grid size={18} />
-                  Browse Resources
-                </TabsTrigger>
-                <TabsTrigger value="submit" className="flex items-center gap-2">
-                  <PlusCircle size={18} />
-                  Submit Resource
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="browse" className="mt-0">
-                {/* Search and Filter Controls */}
-                <div className="relative w-full max-w-xl mx-auto mb-8">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+      <main className="flex-grow">
+        <section className="py-16">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="mb-8">
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                Resources for Data Analytics
+              </h1>
+              <p className="text-gray-600">
+                Explore our curated collection of resources to enhance your
+                data analytics skills.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              <aside className="md:col-span-1">
+                <div className="sticky top-28">
+                  <div className="mb-6">
                     <Input
                       type="text"
                       placeholder="Search resources..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-10 border-gray-200 rounded-lg shadow-sm focus:ring-primary focus:border-primary w-full text-base"
+                      value={searchQuery}
+                      onChange={handleSearchChange}
+                      className="bg-gray-50"
                     />
-                    {searchTerm && (
-                      <button
-                        onClick={() => setSearchTerm('')}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        <X size={18} />
-                      </button>
-                    )}
                   </div>
-                  
-                  <div className="flex justify-between mt-4">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setShowFilters(!showFilters)}
-                      className="flex items-center gap-2"
-                    >
-                      <Filter size={18} />
-                      {showFilters ? "Hide Filters" : "Show Filters"}
-                    </Button>
-                    
-                    {(selectedCategories.length > 0 || selectedTypes.length > 0 || selectedTags.length > 0) && (
-                      <Button 
-                        variant="ghost" 
-                        onClick={clearFilters}
-                        className="text-primary hover:text-primary/80"
+
+                  <ResourceCategories
+                    categories={categories}
+                    selectedCategory={selectedCategory}
+                    onSelect={handleCategorySelect}
+                  />
+
+                  <ResourceTypes
+                    types={types}
+                    selectedType={selectedType}
+                    onSelect={handleTypeSelect}
+                  />
+
+                  <TagCloud
+                    tags={allTags}
+                    selectedTags={selectedTags}
+                    onTagToggle={handleTagToggle}
+                  />
+                </div>
+              </aside>
+
+              <div className="md:col-span-3">
+                {loading ? (
+                  <div className="text-center py-10">Loading resources...</div>
+                ) : error ? (
+                  <div className="text-center py-10 text-red-500">{error}</div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {filteredResources.map((resource) => (
+                      <Card
+                        key={resource.id}
+                        className="overflow-hidden hover:shadow-md transition-shadow duration-300"
                       >
-                        Clear Filters
-                      </Button>
-                    )}
+                        <CardHeader>
+                          <CardTitle className="line-clamp-2">
+                            {resource.title}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <CardDescription className="line-clamp-3 text-gray-600">
+                            {resource.description}
+                          </CardDescription>
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            <Badge variant="secondary">{resource.type}</Badge>
+                            {resource.tags.map((tag) => (
+                              <Badge key={tag}>{tag}</Badge>
+                            ))}
+                          </div>
+                          <Button
+                            asChild
+                            variant="link"
+                            className="mt-4"
+                          >
+                            <a
+                              href={resource.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Learn More
+                            </a>
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="submit">
-                <div className="text-left">
-                  <p className="text-sm text-gray-500 mb-4">
-                    Have a valuable resource to share with the BDAA community? Submit it below, and our team will review it for inclusion in our resource library.
-                  </p>
-                </div>
-              </TabsContent>
-            </Tabs>
-            
-            {/* Active filters - only show on browse tab */}
-            <div id="active-filters">
-              {(selectedCategories.length > 0 || selectedTypes.length > 0 || selectedTags.length > 0) && (
-                <div className="flex flex-wrap gap-2 justify-center mb-6">
-                  {selectedCategories.map(category => (
-                    <Badge 
-                      key={`cat-${category}`}
-                      variant="secondary"
-                      className="px-3 py-1 flex items-center gap-1 bg-white"
-                      onClick={() => toggleCategory(category)}
-                    >
-                      {category}
-                      <X size={14} className="cursor-pointer" />
-                    </Badge>
-                  ))}
-                  
-                  {selectedTypes.map(type => (
-                    <Badge 
-                      key={`type-${type}`}
-                      variant="secondary"
-                      className="px-3 py-1 flex items-center gap-1 bg-white"
-                      onClick={() => toggleType(type)}
-                    >
-                      {type}
-                      <X size={14} className="cursor-pointer" />
-                    </Badge>
-                  ))}
-                  
-                  {selectedTags.map(tag => (
-                    <Badge 
-                      key={`tag-${tag}`}
-                      variant="secondary"
-                      className="px-3 py-1 flex items-center gap-1 bg-white"
-                      onClick={() => toggleTag(tag)}
-                    >
-                      {tag}
-                      <X size={14} className="cursor-pointer" />
-                    </Badge>
-                  ))}
-                </div>
-              )}
+                )}
+              </div>
+            </div>
+
+            <div className="mt-12">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                Submit a Resource
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Help us grow our collection by submitting your favorite data
+                analytics resources.
+              </p>
+              <ResourceSubmissionForm onSubmit={handleSubmit} />
             </div>
           </div>
-        </div>
-      </div>
-      
-      <div className="container mx-auto px-4 py-12">
-        <Tabs defaultValue="browse" className="w-full">
-          <TabsContent value="browse" className="mt-0">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-              <div className="lg:col-span-3">
-                {/* Filters Panel */}
-                {showFilters && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 p-6 bg-white rounded-lg shadow-sm">
-                    {/* Categories Filter */}
-                    <div className="space-y-4">
-                      <h3 className="font-semibold text-lg border-b pb-2">Categories</h3>
-                      <div className="space-y-2">
-                        {/* Fix type issues with categories mapping */}
-                        {(categories as string[]).map((category) => (
-                          <div key={`cat-filter-${category}`} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`cat-${category}`} 
-                              checked={selectedCategories.includes(category)}
-                              onCheckedChange={() => toggleCategory(category)}
-                            />
-                            <Label htmlFor={`cat-${category}`} className="text-sm cursor-pointer">
-                              {category}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Resource Types Filter */}
-                    <div className="space-y-4">
-                      <h3 className="font-semibold text-lg border-b pb-2">Resource Types</h3>
-                      <div className="space-y-2">
-                        {/* Fix type issues with resourceTypes mapping */}
-                        {(resourceTypes as string[]).map((type) => (
-                          <div key={`type-filter-${type}`} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`type-${type}`} 
-                              checked={selectedTypes.includes(type)}
-                              onCheckedChange={() => toggleType(type)}
-                            />
-                            <Label htmlFor={`type-${type}`} className="text-sm capitalize cursor-pointer">
-                              {type}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* Tags Filter */}
-                    <div className="space-y-4">
-                      <h3 className="font-semibold text-lg border-b pb-2">Popular Tags</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {/* Fix type issues with allTags mapping */}
-                        {(allTags as string[]).map((tag) => (
-                          <Badge 
-                            key={`tag-filter-${tag}`}
-                            variant={selectedTags.includes(tag) ? "default" : "outline"}
-                            className={`cursor-pointer ${selectedTags.includes(tag) ? 'bg-primary' : ''}`}
-                            onClick={() => toggleTag(tag)}
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Resources Grid */}
-                {filteredResources.length > 0 ? (
-                  <>
-                    {/* Featured Resources First */}
-                    {filteredResources.some(r => r.featured) && (
-                      <div className="mb-10">
-                        <h2 className="text-2xl font-bold mb-6">Featured Resources</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {filteredResources
-                            .filter(r => r.featured)
-                            .map(resource => (
-                              <ResourceCard key={resource.id} resource={resource} />
-                            ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* All Other Resources */}
-                    <div>
-                      <h2 className="text-2xl font-bold mb-6">All Resources</h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {filteredResources
-                          .filter(r => !r.featured)
-                          .map(resource => (
-                            <ResourceCard key={resource.id} resource={resource} />
-                          ))}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-16">
-                    <div className="text-4xl mb-4">🔍</div>
-                    <h3 className="text-xl font-semibold mb-2">No resources found</h3>
-                    <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
-                    <Button onClick={clearFilters} variant="outline">
-                      Clear All Filters
-                    </Button>
-                  </div>
-                )}
-              </div>
-              
-              {/* Sidebar with Quick Links */}
-              <div className="lg:col-span-1 space-y-6">
-                <QuickLinks links={quickLinks} />
-                
-                <div className="bg-gradient-to-br from-primary/10 to-primary/20 rounded-lg p-6 shadow-sm">
-                  <h3 className="text-lg font-semibold mb-4">Join BDAA</h3>
-                  <p className="text-sm mb-4">
-                    Get access to exclusive resources, workshops, and networking opportunities by becoming a member.
-                  </p>
-                  <Button className="w-full">
-                    Become a Member
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="submit" className="mt-0">
-            <ResourceSubmissionForm onSubmit={handleResourceSubmit} />
-          </TabsContent>
-        </Tabs>
-      </div>
+        </section>
+      </main>
       <Footer />
     </div>
   );
